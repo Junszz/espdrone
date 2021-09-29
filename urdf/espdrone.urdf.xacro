@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+  name="espdrone">
+
+<xacro:arg name="name_space" default="espdrone" />
+	<gazebo reference="base_link">
+	    <material>Gazebo/White</material>
+	</gazebo>
+	<gazebo reference="FL_link">
+	    <material>Gazebo/Green</material>
+	</gazebo>
+	<gazebo reference="BL_link">
+	    <material>Gazebo/Red</material>
+	</gazebo>
+	<gazebo reference="FR_link">
+	    <material>Gazebo/Red</material>
+	</gazebo>
+	<gazebo reference="BR_link">
+	    <material>Gazebo/Green</material>
+	</gazebo>
+	<gazebo reference="camera_link">
+	    <material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="pcb_plate_link">
+	    <material>Gazebo/Blue</material>
+	</gazebo>
+	<gazebo reference="pcb_link">
+	    <material>Gazebo/Yellow</material>
+	</gazebo>
+
+	<material name = "black">
+		<color rgba="0 0 0 1"/>
+	</material>
+	<material name = "red">
+		<color rgba="1 0 0 1"/>
+	</material>
+	<material name = "green">
+		<color rgba="0 1 0 1"/>
+	</material>
+	<material name = "blue">
+		<color rgba="0 0 1 1"/>
+	</material>
+	<material name = "yellow">
+		<color rgba="1 1 0 1"/>
+	</material>
+	<material name = "white">
+		<color rgba="1 1 1 1"/>
+	</material>
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00273534176117628 0.000310104344010811 -0.00921683696721233"
+        rpy="0 0 0" />
+      <mass
+        value="0.0111642034099336" />
+      <inertia
+        ixx="5.74138315905152E-06"
+        ixy="1.92834480377476E-10"
+        ixz="5.23128068754328E-09"
+        iyy="5.59597494658092E-06"
+        iyz="-4.57300185110961E-11"
+        izz="1.07544652567121E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="white">
+<!--
+        <color
+          rgba="1 1 1 1" />  -->
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="FR_link">
+    <inertial>
+      <origin
+        xyz="-2.31951351493953E-06 4.75087751597436E-07 0.00518072305319314"
+        rpy="0 0 0" />
+      <mass
+        value="0.000170761508616818" />
+      <inertia
+        ixx="4.6755014059117E-09"
+        ixy="2.32513739562609E-12"
+        ixz="5.71859115287334E-14"
+        iyy="4.6758546712305E-09"
+        iyz="-1.22257798998163E-12"
+        izz="7.47442921255212E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/FR_link.STL" />
+      </geometry>
+      <material
+        name="red">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/FR_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FR_joint"
+    type="continuous">
+    <origin
+      xyz="0.0257492934362308 -0.0229194400056349 -0.00749999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FR_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="BR_link">
+    <inertial>
+      <origin
+        xyz="-8.1600715337582E-08 -1.72083848282156E-08 0.00522367470183978"
+        rpy="0 0 0" />
+      <mass
+        value="0.00018061996609001" />
+      <inertia
+        ixx="5.31750986815953E-09"
+        ixy="-5.16314476983196E-15"
+        ixz="9.66455527233112E-16"
+        iyy="5.31754307596758E-09"
+        iyz="1.26078782972358E-14"
+        izz="8.76724562794108E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/BR_link.STL" />
+      </geometry>
+      <material
+        name="green">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/BR_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="BR_joint"
+    type="continuous">
+    <origin
+      xyz="-0.0191761230425737 -0.0229194400056349 -0.00749999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="BR_link" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+  <link
+    name="BL_link">
+    <inertial>
+      <origin
+        xyz="2.38010113044621E-06 -1.38898463120096E-07 0.00518072472347876"
+        rpy="0 0 0" />
+      <mass
+        value="0.000170760818462595" />
+      <inertia
+        ixx="4.67479351796267E-09"
+        ixy="2.15642873143842E-12"
+        ixz="-2.37844642269294E-13"
+        iyy="4.67652605370328E-09"
+        iyz="1.1980550310324E-12"
+        izz="7.47439160543409E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/BL_link.STL" />
+      </geometry>
+      <material
+        name="red">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/BL_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="BL_joint"
+    type="continuous">
+    <origin
+      xyz="-0.0191761230425737 0.0236734441396914 -0.00749999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="BL_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="FL_link">
+    <inertial>
+      <origin
+        xyz="3.80231074056936E-08 6.12791400643464E-08 0.00522368229657419"
+        rpy="0 0 0" />
+      <mass
+        value="0.000180619348875049" />
+      <inertia
+        ixx="5.31750546690808E-09"
+        ixy="-1.73067916761242E-14"
+        ixz="7.88814557746303E-15"
+        iyy="5.31749812438277E-09"
+        iyz="-1.38442562224496E-14"
+        izz="8.7672030898276E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/FL_link.STL" />
+      </geometry>
+      <material
+        name="green">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/FL_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FL_joint"
+    type="continuous">
+    <origin
+      xyz="0.0257492934362308 0.0236734441396913 -0.00749999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FL_link" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+  <link
+    name="camera_link">
+    <inertial>
+      <origin
+        xyz="-0.0053534367867157 5.60012155745304E-08 0.00209997888295398"
+        rpy="0 0 0" />
+      <mass
+        value="0.000254844473496216" />
+      <inertia
+        ixx="2.52700381545915E-09"
+        ixy="1.04192854320719E-17"
+        ixz="-1.79532031326891E-15"
+        iyy="1.43070118000395E-09"
+        iyz="4.34605630270488E-15"
+        izz="1.43143838579387E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/camera_link.STL" />
+      </geometry>
+      <material
+        name="black">
+
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/camera_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="camera_joint"
+    type="fixed">
+    <origin
+      xyz="0.0303459244383208 4.86220498038051E-05 -0.00399998047147145"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="camera_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="pcb_link">
+    <inertial>
+      <origin
+        xyz="0.00022494415763474 6.19688084457087E-06 0.000796325853178126"
+        rpy="0 0 0" />
+      <mass
+        value="0.00172915830500381" />
+      <inertia
+        ixx="4.79318130962085E-08"
+        ixy="1.92841414340502E-10"
+        ixz="3.18428765368808E-10"
+        iyy="2.05435520095623E-07"
+        iyz="-4.50719451470362E-11"
+        izz="2.51263861490945E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/pcb_link_visual.STL" />
+      </geometry>
+      <material
+        name="yellow">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/pcb_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="pcb_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="pcb_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="pcb_plate_link">
+    <inertial>
+      <origin
+        xyz="0.00022495550644493 6.20412368211587E-06 0.000796328088142936"
+        rpy="0 0 0" />
+      <mass
+        value="0.00172915383636057" />
+      <inertia
+        ixx="4.79319207989059E-08"
+        ixy="1.93051673791148E-10"
+        ixz="3.1844298586841E-10"
+        iyy="2.05435513643283E-07"
+        iyz="-4.50628996738981E-11"
+        izz="2.51263977451861E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/pcb_plate_link.STL" />
+      </geometry>
+      <material
+        name="blue">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://espdrone/meshes/pcb_plate_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="pcb_plate_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="pcb_plate_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+<!-- gazebo imu -->
+  <gazebo>
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>imu</bodyName>
+      <topicName>espdrone_imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>20.0</updateRate>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="pcb_plate_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>imu</topicName>
+        <bodyName>pcb_plate_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+	<!-- camera plugin -->
+
+	<gazebo reference="camera_link">
+		  <sensor type="camera" name="camera1">
+		    <update_rate>20.0</update_rate>
+		    <camera name="head">
+		      <horizontal_fov>1.3962634</horizontal_fov>
+		      <image>
+		        <width>800</width>
+		        <height>800</height>
+		        <format>R8G8B8</format>
+		      </image>
+		      <clip>
+		        <near>0.02</near>
+		        <far>300</far>
+		      </clip>
+		      <noise>
+		        <type>gaussian</type>
+		        <!-- Noise is sampled independently per pixel on each frame.
+		             That pixel's noise value is added to each of its color
+		             channels, which at that point lie in the range [0,1]. -->
+		        <mean>0.0</mean>
+		        <stddev>0.007</stddev>
+		      </noise>
+		    </camera>
+		    <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+		      <alwaysOn>true</alwaysOn>
+		      <updateRate>0.0</updateRate>
+		      <cameraName>espdrone/camera1</cameraName>
+		      <imageTopicName>image_raw</imageTopicName>
+		      <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+		      <frameName>camera_link</frameName>
+		      <hackBaseline>0.07</hackBaseline>
+		      <distortionK1>0.0</distortionK1>
+		      <distortionK2>0.0</distortionK2>
+		      <distortionK3>0.0</distortionK3>
+		      <distortionT1>0.0</distortionT1>
+		      <distortionT2>0.0</distortionT2>
+		    </plugin>
+		  </sensor>
+		</gazebo>
+
+  <!-- ros_control plugin --> 
+  <gazebo> 
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> 
+      <robotNamespace>/$(arg name_space)</robotNamespace> 
+    </plugin> 
+  </gazebo> 
+
+  <!-- transmission -->
+  <transmission name="FL_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FL_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FL_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="FR_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FR_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FR_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="BR_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="BR_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="BR_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="BL_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="BL_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="BL_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+</robot>

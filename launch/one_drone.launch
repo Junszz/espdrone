@@ -1,0 +1,30 @@
+<launch>
+	<arg name="x" default="0.0" />
+	<arg name="y" default="0.0" />
+	<arg name="z" default="0.0" />
+	<arg name="R" default="0.0" />
+	<arg name="P" default="0.0" />
+	<arg name="Y" default="0.0" />
+	<arg name="name" default="espdrone" />
+
+<rosparam file="$(find espdrone)/config/config.yaml" command="load"/>
+<param name="robot_description" command="$(find xacro)/xacro.py --inorder '$(find espdrone)/urdf/espdrone.urdf.xacro' name_space:=$(arg name)"/>
+
+
+  <node
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    respawn="false"
+    args="-model $(arg name) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
+    output="screen" />
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/$(arg name)" args="joint1_velocity_controller joint2_velocity_controller joint3_velocity_controller joint4_velocity_controller joint_state_controller"/>
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+    <remap from="/joint_states" to="/$(arg name)/joint_states" />
+  </node>
+</launch>
