@@ -6,7 +6,7 @@
 	<arg name="P" default="0.0" />
 	<arg name="Y" default="0.0" />
 	<arg name="name" default="espdrone" />
-  <arg name="frame" default="base_link" />
+  <arg name="frame" default="base_footprint" />
   <arg name="worldFrame" default="world_frame" />
 
 <rosparam file="$(find espdrone_driver)/config/config.yaml" command="load"/>
@@ -21,8 +21,8 @@
     args="-model $(arg name) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
     output="screen" />
 
-  <node name="controller" pkg="espdrone_controller" type="espdrone_controller" output="screen" ns="/$(arg name)" >
-    <param name="frame" value="$(arg frame)" />
+  <node name="controller" pkg="espdrone_controller" type="controller" output="screen" ns="/$(arg name)" >
+    <param name="frame" value="/$(arg name)_tf/$(arg frame)" />
     <param name="worldFrame" value="$(arg worldFrame)" />
     <rosparam command="load" file="$(find espdrone_controller)/config/espdrone.yaml" />
   </node>
