@@ -1,5 +1,5 @@
 <package format="2">
-  <name>espdrone</name>
+  <name>espdrone_driver</name>
   <version>1.0.0</version>
   <description>
     <p>URDF Description package for espdrone</p>

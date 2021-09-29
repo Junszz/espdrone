@@ -1,13 +1,8 @@
 <launch>
-	<arg name="x" default="0.0" />
-	<arg name="y" default="0.0" />
-	<arg name="z" default="0.0" />
-	<arg name="name" default="espdrone" />
-  <rosparam file="$(find espdrone)/config/config.yaml" command="load"/>
-  <param name="robot_description" textfile="$(find espdrone)/urdf/espdrone.urdf" />
+  <rosparam file="$(find espdrone_driver)/config/config.yaml" command="load"/>
+
   <include
     file="$(find gazebo_ros)/launch/empty_world.launch" />
-
   <node
     name="tf_footprint_base"
     pkg="tf"
@@ -18,7 +13,7 @@
     pkg="gazebo_ros"
     type="spawn_model"
     respawn="false"
-    args="-urdf -model espdrone.urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z)"
+    args="-urdf -model espdrone.urdf -param robot_description"
     output="screen" />
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" ns="/espdrone" args="joint1_velocity_controller joint2_velocity_controller joint3_velocity_controller joint4_velocity_controller joint_state_controller"/>
@@ -28,7 +23,4 @@
     respawn="false" output="screen">
     <remap from="/joint_states" to="/espdrone/joint_states" />
   </node>
-
-  <node name="tf_publisher" pkg="espdrone" type="tf_broadcaster_imu.py" output="screen"/>
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find espdrone)/config/espdrone.rviz" required="true" />
 </launch>

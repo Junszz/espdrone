@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(espdrone)
+project(espdrone_driver)
 
 find_package(catkin REQUIRED)
 

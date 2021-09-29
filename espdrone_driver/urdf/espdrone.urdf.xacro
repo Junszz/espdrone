@@ -71,7 +71,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/base_link.STL" />
+          filename="package://espdrone_driver/meshes/base_link.STL" />
       </geometry>
       <material
         name="white">
@@ -86,7 +86,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/base_link.STL" />
+          filename="package://espdrone_driver/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -112,7 +112,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/FR_link.STL" />
+          filename="package://espdrone_driver/meshes/FR_link.STL" />
       </geometry>
       <material
         name="red">
@@ -124,7 +124,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/FR_link.STL" />
+          filename="package://espdrone_driver/meshes/FR_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -163,7 +163,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/BR_link.STL" />
+          filename="package://espdrone_driver/meshes/BR_link.STL" />
       </geometry>
       <material
         name="green">
@@ -175,7 +175,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/BR_link.STL" />
+          filename="package://espdrone_driver/meshes/BR_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -214,7 +214,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/BL_link.STL" />
+          filename="package://espdrone_driver/meshes/BL_link.STL" />
       </geometry>
       <material
         name="red">
@@ -226,7 +226,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/BL_link.STL" />
+          filename="package://espdrone_driver/meshes/BL_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -265,7 +265,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/FL_link.STL" />
+          filename="package://espdrone_driver/meshes/FL_link.STL" />
       </geometry>
       <material
         name="green">
@@ -277,7 +277,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/FL_link.STL" />
+          filename="package://espdrone_driver/meshes/FL_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -316,7 +316,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/camera_link.STL" />
+          filename="package://espdrone_driver/meshes/camera_link.STL" />
       </geometry>
       <material
         name="black">
@@ -329,7 +329,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/camera_link.STL" />
+          filename="package://espdrone_driver/meshes/camera_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -368,7 +368,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/pcb_link_visual.STL" />
+          filename="package://espdrone_driver/meshes/pcb_link_visual.STL" />
       </geometry>
       <material
         name="yellow">
@@ -380,7 +380,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/pcb_link.STL" />
+          filename="package://espdrone_driver/meshes/pcb_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -419,7 +419,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/pcb_plate_link.STL" />
+          filename="package://espdrone_driver/meshes/pcb_plate_link.STL" />
       </geometry>
       <material
         name="blue">
@@ -431,7 +431,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://espdrone/meshes/pcb_plate_link.STL" />
+          filename="package://espdrone_driver/meshes/pcb_plate_link.STL" />
       </geometry>
     </collision>
   </link>

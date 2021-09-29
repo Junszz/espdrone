@@ -7,8 +7,8 @@
 	<arg name="Y" default="0.0" />
 	<arg name="name" default="espdrone" />
 
-<rosparam file="$(find espdrone)/config/config.yaml" command="load"/>
-<param name="robot_description" command="$(find xacro)/xacro.py --inorder '$(find espdrone)/urdf/espdrone.urdf.xacro' name_space:=$(arg name)"/>
+<rosparam file="$(find espdrone_driver)/config/config.yaml" command="load"/>
+<param name="robot_description" command="$(find xacro)/xacro '$(find espdrone_driver)/urdf/espdrone.urdf.xacro' name_space:=$(arg name)"/>
 
 
   <node

@@ -3,8 +3,8 @@
   <!-- start world -->
   <include
     file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find espdrone)/gazebo_world/aruco_world.world"/>
+    <arg name="world_name" value="empty_world"/>
 		<arg name="verbose" value="true"/>
 </include>
-  <include file="$(find espdrone)/launch/drones.launch"/>
+  <include file="$(find espdrone_driver)/launch/drones.launch"/>
 </launch>
