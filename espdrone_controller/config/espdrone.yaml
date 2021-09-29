@@ -31,3 +31,23 @@ PIDs:
     maxOutput: 200.0
     integratorMin: 0.0
     integratorMax: 0.0
+
+gazebo_ros_control:   
+  pid_gains:
+    FL_joint:
+      p: 100.0
+      i: 0.01 
+      d: 10.0
+    FL_joint:
+      p: 100.0
+      i: 0.01 
+      d: 10.0
+    FL_joint:
+      p: 100.0
+      i: 0.01 
+      d: 10.0
+    FL_joint:
+      p: 100.0
+      i: 0.01 
+      d: 10.0
+      

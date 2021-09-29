@@ -20,4 +20,21 @@ joint4_velocity_controller:
   joint: BR_joint
   pid: {p: 1.0, i: 0.01, d: 0.0}
 
-
+gazebo_ros_control:   
+  pid_gains:
+    BL_joint:
+      p: 1.0
+      i: 0.0
+      d: 0.01
+    BR_joint:
+      p: 1.0
+      i: 0.0
+      d: 0.01
+    FL_joint:
+      p: 1.0
+      i: 0.0
+      d: 0.01
+    FR_joint:
+      p: 1.0
+      i: 0.0
+      d: 0.01
