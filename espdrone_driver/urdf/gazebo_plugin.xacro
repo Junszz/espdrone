@@ -183,6 +183,47 @@
 				<control_joint>BR_joint</control_joint>
 			</plugin>
 		</gazebo>
+
+	<gazebo reference="BR_joint">
+		<provideFeedback>true</provideFeedback>
+    </gazebo>
+	<gazebo reference="BL_joint">
+		<provideFeedback>true</provideFeedback>
+    </gazebo>
+	<gazebo reference="FR_joint">
+		<provideFeedback>true</provideFeedback>
+    </gazebo>
+	<gazebo reference="FL_joint">
+		<provideFeedback>true</provideFeedback>
+    </gazebo>
+	<gazebo>
+		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+		<updateRate>10.0</updateRate>
+		<topicName>BR_joint_sensor</topicName>
+		<jointName>BR_joint</jointName>
+		</plugin>
+  	</gazebo>
+	<gazebo>
+		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+		<updateRate>10.0</updateRate>
+		<topicName>BL_joint_sensor</topicName>
+		<jointName>BL_joint</jointName>
+		</plugin>
+  	</gazebo>
+	<gazebo>
+		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+		<updateRate>10.0</updateRate>
+		<topicName>FR_joint_sensor</topicName>
+		<jointName>FR_joint</jointName>
+		</plugin>
+  	</gazebo>
+	<gazebo>
+		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+		<updateRate>10.0</updateRate>
+		<topicName>FL_joint_sensor</topicName>
+		<jointName>FL_joint</jointName>
+		</plugin>
+  	</gazebo>
   <!-- ros_control plugin --> 
   <gazebo> 
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> 
