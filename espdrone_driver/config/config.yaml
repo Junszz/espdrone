@@ -20,4 +20,3 @@ joint4_velocity_controller:
   joint: BR_joint
   pid: {p: 1.0, i: 0.01, d: 0.0}
 
-

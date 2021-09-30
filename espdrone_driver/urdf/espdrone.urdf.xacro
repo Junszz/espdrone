@@ -2,34 +2,9 @@
 <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot xmlns:xacro="http://ros.org/wiki/xacro"
-  name="espdrone">
-
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="espdrone">
+<xacro:include filename="$(find espdrone_driver)/urdf/gazebo_plugin.xacro" />
 <xacro:arg name="name_space" default="espdrone" />
-	<gazebo reference="base_link">
-	    <material>Gazebo/White</material>
-	</gazebo>
-	<gazebo reference="FL_link">
-	    <material>Gazebo/Green</material>
-	</gazebo>
-	<gazebo reference="BL_link">
-	    <material>Gazebo/Red</material>
-	</gazebo>
-	<gazebo reference="FR_link">
-	    <material>Gazebo/Red</material>
-	</gazebo>
-	<gazebo reference="BR_link">
-	    <material>Gazebo/Green</material>
-	</gazebo>
-	<gazebo reference="camera_link">
-	    <material>Gazebo/Black</material>
-	</gazebo>
-	<gazebo reference="pcb_plate_link">
-	    <material>Gazebo/Blue</material>
-	</gazebo>
-	<gazebo reference="pcb_link">
-	    <material>Gazebo/Yellow</material>
-	</gazebo>
 
 	<material name = "black">
 		<color rgba="0 0 0 1"/>
@@ -448,88 +423,6 @@
     <axis
       xyz="0 0 0" />
   </joint>
-
-<!-- gazebo imu -->
-  <gazebo>
-    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
-      <alwaysOn>true</alwaysOn>
-      <bodyName>imu</bodyName>
-      <topicName>espdrone_imu</topicName>
-      <serviceName>imu_service</serviceName>
-      <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>20.0</updateRate>
-    </plugin>
-  </gazebo>
-
-  <gazebo reference="pcb_plate_link">
-    <gravity>true</gravity>
-    <sensor name="imu_sensor" type="imu">
-      <always_on>true</always_on>
-      <update_rate>100</update_rate>
-      <visualize>true</visualize>
-      <topic>__default_topic__</topic>
-      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        <topicName>imu</topicName>
-        <bodyName>pcb_plate_link</bodyName>
-        <updateRateHZ>10.0</updateRateHZ>
-        <gaussianNoise>0.0</gaussianNoise>
-        <xyzOffset>0 0 0</xyzOffset>
-        <rpyOffset>0 0 0</rpyOffset>
-        <frameName>imu_link</frameName>
-        <initialOrientationAsReference>false</initialOrientationAsReference>
-      </plugin>
-      <pose>0 0 0 0 0 0</pose>
-    </sensor>
-  </gazebo>
-
-	<!-- camera plugin -->
-
-	<gazebo reference="camera_link">
-		  <sensor type="camera" name="camera1">
-		    <update_rate>20.0</update_rate>
-		    <camera name="head">
-		      <horizontal_fov>1.3962634</horizontal_fov>
-		      <image>
-		        <width>800</width>
-		        <height>800</height>
-		        <format>R8G8B8</format>
-		      </image>
-		      <clip>
-		        <near>0.02</near>
-		        <far>300</far>
-		      </clip>
-		      <noise>
-		        <type>gaussian</type>
-		        <!-- Noise is sampled independently per pixel on each frame.
-		             That pixel's noise value is added to each of its color
-		             channels, which at that point lie in the range [0,1]. -->
-		        <mean>0.0</mean>
-		        <stddev>0.007</stddev>
-		      </noise>
-		    </camera>
-		    <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-		      <alwaysOn>true</alwaysOn>
-		      <updateRate>0.0</updateRate>
-		      <cameraName>espdrone/camera1</cameraName>
-		      <imageTopicName>image_raw</imageTopicName>
-		      <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-		      <frameName>camera_link</frameName>
-		      <hackBaseline>0.07</hackBaseline>
-		      <distortionK1>0.0</distortionK1>
-		      <distortionK2>0.0</distortionK2>
-		      <distortionK3>0.0</distortionK3>
-		      <distortionT1>0.0</distortionT1>
-		      <distortionT2>0.0</distortionT2>
-		    </plugin>
-		  </sensor>
-		</gazebo>
-
-  <!-- ros_control plugin --> 
-  <gazebo> 
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> 
-      <robotNamespace>/$(arg name_space)</robotNamespace> 
-    </plugin> 
-  </gazebo> 
 
   <!-- transmission -->
   <transmission name="FL_trans">
