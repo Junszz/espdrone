@@ -2,7 +2,7 @@
 
   <!-- BEGIN ROBOT 1-->
   <group ns="drone1">
-    <param name="tf_prefix" value="drone1_tf" />
+    <param name="tf_prefix" value="drone1" />
     <include file="$(find espdrone_driver)/launch/one_drone.launch" >
       <arg name="x" value="0.0" />
 	    <arg name="y" value="0.0" />
@@ -14,7 +14,7 @@
 
   <!-- BEGIN ROBOT 2-->
   <group ns="drone2">
-    <param name="tf_prefix" value="drone2_tf" />
+    <param name="tf_prefix" value="drone2" />
     <include file="$(find espdrone_driver)/launch/one_drone.launch" >
       <arg name="x" value="0.0" />
 	    <arg name="y" value="-1.0" />
