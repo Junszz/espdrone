@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 import rospy
 import tf_conversions
 import tf2_ros

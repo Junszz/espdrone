@@ -1,8 +1,8 @@
+#!/usr/bin/python
 #-------------
 import time
-import argparse
 #--------------------------------------------------------------------------------------------------------------------------------------
-def PID(roll, pitch, yaw, f):
+def PID(roll, pitch, yaw, f, vel):
 	#Define the global variables to prevent them from dying and resetting to zero, each time a function call occurs. Some of these variables 		may be redundant.
 	global kp_roll, ki_roll, kd_roll, kp_pitch, ki_pitch, kd_pitch, kp_yaw, ki_yaw, kd_yaw, prevErr_roll, prevErr_pitch, prevErr_yaw, pMem_roll, pMem_yaw, pMem_pitch, iMem_roll, iMem_pitch, iMem_yaw, dMem_roll, dMem_pitch, dMem_yaw, flag, setpoint, sampleTime
 	#-----------------------
@@ -129,10 +129,10 @@ def PID(roll, pitch, yaw, f):
 	if(esc_fl < 1100): esc_fl = 1100
 	
 	#Map the esc values to motor values
-	br_motor_vel = ((esc_br - 1500)/25) + 200
-	bl_motor_vel = ((esc_bl - 1500)/25) + 200
-	fr_motor_vel = ((esc_fr - 1500)/25) + 200
-	fl_motor_vel = ((esc_fl - 1500)/25) + 200
+	br_motor_vel = ((esc_br - 1500)/25) + int(vel)
+	bl_motor_vel = ((esc_bl - 1500)/25) + int(vel)
+	fr_motor_vel = ((esc_fr - 1500)/25) + int(vel)
+	fl_motor_vel = ((esc_fl - 1500)/25) + int(vel)
 	#----------------------------------------------------------------------------------------------------------------------------------
 	#Ignore this shit here.
 	'''
