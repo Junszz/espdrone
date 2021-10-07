@@ -39,7 +39,7 @@ gedit .bashrc
 ```
 Add this line at the end of the file.
 ```
-source ~/danger_ws/devel/setup.bash
+source ~/catkin_ws/devel/setup.bash
 ```
 
 4. Clone all the folders and files in this repo into /src
@@ -56,7 +56,7 @@ chmod +x keyboard_teleop.py
 
 5. Execute the following command to build into your ROS workspace
 ```
-cd ~/danger_ws
+cd ~/catkin_ws
 catkin build
 source devel/setup.bash
 ```
@@ -70,6 +70,6 @@ roslaunch espdrone_driver main.launch
 
 This should load the Quadcopter.
 
-![Image](https://github.com/Junszz/espdrone/origin/main/Image.png)
+![Image](https://github.com/Junszz/espdrone/blob/main/Image.png)
 
 The pid values are in the espdrone_controller/config/espdrone.yaml file in your espdrone directory. Play around with the values to see some control theory in action!
