@@ -5,18 +5,35 @@ joint_state_controller:
 # Velocity Controllers ---------------------------------------
 joint1_velocity_controller:
   type: velocity_controllers/JointVelocityController
-  joint: FL_joint
+  joint: FL_joint_1
   pid: {p: 1.0, i: 0.01, d: 0.0}
 joint2_velocity_controller:
   type: velocity_controllers/JointVelocityController
-  joint: FR_joint
+  joint: FR_joint_1
   pid: {p: 1.0, i: 0.01, d: 0.0}
 joint3_velocity_controller:
   type: velocity_controllers/JointVelocityController
-  joint: BL_joint
+  joint: BL_joint_1
   pid: {p: 1.0, i: 0.01, d: 0.0}
 joint4_velocity_controller:
   type: velocity_controllers/JointVelocityController
-  joint: BR_joint
+  joint: BR_joint_1
+  pid: {p: 1.0, i: 0.01, d: 0.0}
+
+joint1_velocity_controller:
+  type: velocity_controllers/JointVelocityController
+  joint: FL_joint_2
+  pid: {p: 1.0, i: 0.01, d: 0.0}
+joint2_velocity_controller:
+  type: velocity_controllers/JointVelocityController
+  joint: FR_joint_2
+  pid: {p: 1.0, i: 0.01, d: 0.0}
+joint3_velocity_controller:
+  type: velocity_controllers/JointVelocityController
+  joint: BL_joint_2
+  pid: {p: 1.0, i: 0.01, d: 0.0}
+joint4_velocity_controller:
+  type: velocity_controllers/JointVelocityController
+  joint: BR_joint_2
   pid: {p: 1.0, i: 0.01, d: 0.0}
 
