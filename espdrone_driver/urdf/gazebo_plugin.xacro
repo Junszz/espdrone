@@ -160,7 +160,10 @@
 				<upward>0 0 -1</upward>
 				<link_name>BL_link_$(arg drone_index)</link_name>
 				<control_joint>BL_joint_$(arg drone_index)</control_joint>
-			</plugin>
+			</plugin>camera
+camera
+camera
+camera
 		</gazebo>
 		
 		<gazebo>
