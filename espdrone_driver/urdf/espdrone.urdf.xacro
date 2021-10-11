@@ -4,7 +4,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="espdrone">
 <xacro:include filename="$(find espdrone_driver)/urdf/gazebo_plugin.xacro" />
-<xacro:arg name="name_space" default="espdrone" />
+<xacro:arg name="drone_index" default="1" />
 
 	<material name = "black">
 		<color rgba="0 0 0 1"/>
@@ -25,7 +25,7 @@
 		<color rgba="1 1 1 1"/>
 	</material>
   <link
-    name="base_link">
+    name="base_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="0.00273534176117628 0.000310104344010811 -0.00921683696721233"
@@ -66,7 +66,7 @@
     </collision>
   </link>
   <link
-    name="FR_link">
+    name="FR_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="-2.31951351493953E-06 4.75087751597436E-07 0.00518072305319314"
@@ -104,20 +104,20 @@
     </collision>
   </link>
   <joint
-    name="FR_joint"
+    name="FR_joint_$(arg drone_index)"
     type="continuous">
     <origin
       xyz="0.0257492934362308 -0.0229194400056349 -0.00749999999999998"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="FR_link" />
+      link="FR_link_$(arg drone_index)" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="BR_link">
+    name="BR_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="-8.1600715337582E-08 -1.72083848282156E-08 0.00522367470183978"
@@ -155,20 +155,20 @@
     </collision>
   </link>
   <joint
-    name="BR_joint"
+    name="BR_joint_$(arg drone_index)"
     type="continuous">
     <origin
       xyz="-0.0191761230425737 -0.0229194400056349 -0.00749999999999998"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="BR_link" />
+      link="BR_link_$(arg drone_index)" />
     <axis
       xyz="0 0 -1" />
   </joint>
   <link
-    name="BL_link">
+    name="BL_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="2.38010113044621E-06 -1.38898463120096E-07 0.00518072472347876"
@@ -206,20 +206,20 @@
     </collision>
   </link>
   <joint
-    name="BL_joint"
+    name="BL_joint_$(arg drone_index)"
     type="continuous">
     <origin
       xyz="-0.0191761230425737 0.0236734441396914 -0.00749999999999998"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="BL_link" />
+      link="BL_link_$(arg drone_index)" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="FL_link">
+    name="FL_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="3.80231074056936E-08 6.12791400643464E-08 0.00522368229657419"
@@ -257,20 +257,20 @@
     </collision>
   </link>
   <joint
-    name="FL_joint"
+    name="FL_joint_$(arg drone_index)"
     type="continuous">
     <origin
       xyz="0.0257492934362308 0.0236734441396913 -0.00749999999999998"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="FL_link" />
+      link="FL_link_$(arg drone_index)" />
     <axis
       xyz="0 0 -1" />
   </joint>
   <link
-    name="camera_link">
+    name="camera_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="-0.0053534367867157 5.60012155745304E-08 0.00209997888295398"
@@ -309,20 +309,20 @@
     </collision>
   </link>
   <joint
-    name="camera_joint"
+    name="camera_joint_$(arg drone_index)"
     type="fixed">
     <origin
       xyz="0.0303459244383208 4.86220498038051E-05 -0.00399998047147145"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="camera_link" />
+      link="camera_link_$(arg drone_index)" />
     <axis
       xyz="0 0 0" />
   </joint>
   <link
-    name="pcb_link">
+    name="pcb_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="0.00022494415763474 6.19688084457087E-06 0.000796325853178126"
@@ -360,20 +360,20 @@
     </collision>
   </link>
   <joint
-    name="pcb_joint"
+    name="pcb_joint_$(arg drone_index)"
     type="fixed">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="pcb_link" />
+      link="pcb_link_$(arg drone_index)" />
     <axis
       xyz="0 0 0" />
   </joint>
   <link
-    name="pcb_plate_link">
+    name="pcb_plate_link_$(arg drone_index)">
     <inertial>
       <origin
         xyz="0.00022495550644493 6.20412368211587E-06 0.000796328088142936"
@@ -411,59 +411,59 @@
     </collision>
   </link>
   <joint
-    name="pcb_plate_joint"
+    name="pcb_plate_joint_$(arg drone_index)"
     type="fixed">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="pcb_plate_link" />
+      link="pcb_plate_link_$(arg drone_index)" />
     <axis
       xyz="0 0 0" />
   </joint>
 
   <!-- transmission -->
-  <transmission name="FL_trans">
+  <transmission name="FL_trans_$(arg drone_index)">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="FL_joint">
+    <joint name="FL_joint_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
-    <actuator name="FL_motor">
+    <actuator name="FL_motor_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="FR_trans">
+  <transmission name="FR_trans_$(arg drone_index)">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="FR_joint">
+    <joint name="FR_joint_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
-    <actuator name="FR_motor">
+    <actuator name="FR_motor_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="BR_trans">
+  <transmission name="BR_trans_$(arg drone_index)">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="BR_joint">
+    <joint name="BR_joint_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
-    <actuator name="BR_motor">
+    <actuator name="BR_motor_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
-  <transmission name="BL_trans">
+  <transmission name="BL_trans_$(arg drone_index)">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="BL_joint">
+    <joint name="BL_joint_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
-    <actuator name="BL_motor">
+    <actuator name="BL_motor_$(arg drone_index)">
       <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>

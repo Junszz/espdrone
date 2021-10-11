@@ -46,7 +46,7 @@ def handle_gazebo_pose(msg):
             br_base = tf2_ros.TransformBroadcaster()
             t = geometry_msgs.msg.TransformStamped()
             t.header.stamp = rospy.Time.now()
-            t.header.frame_id = "world_frame"
+            t.header.frame_id = "aruco_map"
             t.child_frame_id = "/" + str(robot) + "_tf/base_footprint"
             t.transform.translation.x = x
             t.transform.translation.y = y
@@ -61,7 +61,7 @@ def handle_gazebo_pose(msg):
             t = geometry_msgs.msg.TransformStamped()
             t.header.stamp = rospy.Time.now()
             t.header.frame_id = "/" + str(robot) + "_tf/base_footprint"
-            t.child_frame_id = "/" + str(robot) + "_tf/base_link"
+            t.child_frame_id = "base_link_" + str(robot)[-1]
             t.transform.translation.x = 0
             t.transform.translation.y = 0
             t.transform.translation.z = z
