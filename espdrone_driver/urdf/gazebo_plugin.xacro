@@ -112,7 +112,7 @@
 				<cda_stall>1.0</cda_stall>
 				<cma_stall>0.0</cma_stall>
 				<cp>0 0.5 0</cp>
-				<area>8.043e-4</area>
+				<area>1e-3</area>
 				<air_density>1.2041</air_density>
 				<forward>1 0 0</forward>
 				<upward>0 0 1</upward>
@@ -133,7 +133,7 @@
 				<cda_stall>1.0</cda_stall>
 				<cma_stall>0.0</cma_stall>
 				<cp>0 0.5 0</cp>
-				<area>8.043e-4</area>
+				<area>1e-3</area>
 				<air_density>1.2041</air_density>
 				<forward>1 0 0</forward>
 				<upward>0 0 -1</upward>
@@ -143,7 +143,7 @@
 		</gazebo>
 		
 		<gazebo>
-			<!-- Provide a Negative Velocity -->
+			<!-- Provide a Positive Velocity -->
 			<plugin name="BL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -154,16 +154,13 @@
 				<cda_stall>1.0</cda_stall>
 				<cma_stall>0.0</cma_stall>
 				<cp>0 0.5 0</cp>
-				<area>8.043e-4</area>
+				<area>1e-3</area>
 				<air_density>1.2041</air_density>
 				<forward>1 0 0</forward>
-				<upward>0 0 -1</upward>
+				<upward>0 0 1</upward>
 				<link_name>BL_link_$(arg drone_index)</link_name>
 				<control_joint>BL_joint_$(arg drone_index)</control_joint>
-			</plugin>camera
-camera
-camera
-camera
+			</plugin>
 		</gazebo>
 		
 		<gazebo>
@@ -178,7 +175,7 @@ camera
 				<cda_stall>1.0</cda_stall>
 				<cma_stall>0.0</cma_stall>
 				<cp>0 0.5 0</cp>
-				<area>8.043e-4</area>
+				<area>1e-3</area>
 				<air_density>1.2041</air_density>
 				<forward>1 0 0</forward>
 				<upward>0 0 1</upward>
