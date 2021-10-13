@@ -33,12 +33,12 @@
       <mass
         value="0.022" />
       <inertia
-        ixx="5.6903E-06"
-        ixy="-1.7344E-15"
-        ixz="4.9169E-09"
-        iyy="5.3876E-06"
-        iyz="-1.6461E-13"
-        izz="1.0498E-05" />
+        ixx="5.69029262704911E-06"
+        ixy="-1.73442408668395E-15"
+        ixz="4.91686829558567E-09"
+        iyy="5.38757483059318E-06"
+        iyz="-1.64607132637373E-13"
+        izz="1.04978709710599E-05" />
     </inertial>
     <visual>
       <origin
@@ -420,9 +420,9 @@
       xyz="0.017473 -0.0052357 -0.0077544"
       rpy="0 0 0" />
     <parent
-      link="base_link$(arg drone_index)" />
+      link="base_link_$(arg drone_index)" />
     <child
-      link="pcb_plate_link$(arg drone_index)" />
+      link="pcb_plate_link_$(arg drone_index)" />
     <axis
       xyz="0 0.63613 0.77159" />
   </joint>
