@@ -6,9 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
         - /TF1/Frames1
         - /TF1/Tree1
         - /Image1
+        - /Image1/Status1
       Splitter Ratio: 0.4268292784690857
     Tree Height: 725
   - Class: rviz/Selection
@@ -171,7 +173,7 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         BL_link_1:
           Value: true
         BL_link_2:
@@ -190,6 +192,8 @@ Visualization Manager:
           Value: true
         aruco_map:
           Value: true
+        base_footprint:
+          Value: true
         base_link_1:
           Value: true
         base_link_2:
@@ -198,9 +202,9 @@ Visualization Manager:
           Value: true
         camera_link_2:
           Value: true
-        drone1_tf/base_footprint:
+        odom_1:
           Value: true
-        drone2_tf/base_footprint:
+        odom_2:
           Value: true
         pcb_link_1:
           Value: true
@@ -221,38 +225,10 @@ Visualization Manager:
       Tree:
         world_frame:
           aruco_map:
-            drone1_tf/base_footprint:
-              base_link_1:
-                BL_link_1:
-                  {}
-                BR_link_1:
-                  {}
-                FL_link_1:
-                  {}
-                FR_link_1:
-                  {}
-                camera_link_1:
-                  {}
-                pcb_link_1:
-                  {}
-                pcb_plate_link_1:
-                  {}
-            drone2_tf/base_footprint:
-              base_link_2:
-                BL_link_2:
-                  {}
-                BR_link_2:
-                  {}
-                FL_link_2:
-                  {}
-                FR_link_2:
-                  {}
-                camera_link_2:
-                  {}
-                pcb_link_2:
-                  {}
-                pcb_plate_link_2:
-                  {}
+            camera_link_1:
+              {}
+            camera_link_2:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
@@ -295,7 +271,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 8.507153511047363
+      Distance: 0.42092594504356384
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -303,17 +279,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.1820044219493866
-        Y: 0.030906593427062035
-        Z: 0.0503879114985466
+        X: 0.02794746123254299
+        Y: 0.004945298656821251
+        Z: 0.08227560669183731
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7003982067108154
+      Pitch: 0.6753981709480286
       Target Frame: <Fixed Frame>
-      Yaw: 4.728581428527832
+      Yaw: 5.043582439422607
     Saved: ~
 Window Geometry:
   Displays:

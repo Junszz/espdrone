@@ -107,7 +107,7 @@
     name="FR_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="0.0257492934362308 -0.0229194400056349 -0.00749999999999998"
+      xyz="0.0257492934362308 -0.0229194400056349 -0.0045"
       rpy="0 0 0" />
     <parent
       link="base_link_$(arg drone_index)" />
@@ -158,7 +158,7 @@
     name="BR_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="-0.0191761230425737 -0.0229194400056349 -0.00749999999999998"
+      xyz="-0.0191761230425737 -0.0229194400056349 -0.0045"
       rpy="0 0 0" />
     <parent
       link="base_link_$(arg drone_index)" />
@@ -209,7 +209,7 @@
     name="BL_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="-0.0191761230425737 0.0236734441396914 -0.00749999999999998"
+      xyz="-0.0191761230425737 0.0236734441396914 -0.0045"
       rpy="0 0 0" />
     <parent
       link="base_link_$(arg drone_index)" />
@@ -260,7 +260,7 @@
     name="FL_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="0.0257492934362308 0.0236734441396913 -0.00749999999999998"
+      xyz="0.0257492934362308 0.0236734441396913 -0.0045"
       rpy="0 0 0" />
     <parent
       link="base_link_$(arg drone_index)" />
