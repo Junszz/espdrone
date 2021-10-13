@@ -28,17 +28,17 @@
     name="base_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="0.00273534176117628 0.000310104344010811 -0.00921683696721233"
+        xyz="1.1546E-17 -9.6133E-19 1.2281E-18"
         rpy="0 0 0" />
       <mass
-        value="0.05" />
+        value="0.022" />
       <inertia
-        ixx="5.74138315905152E-06"
-        ixy="1.92834480377476E-10"
-        ixz="5.23128068754328E-09"
-        iyy="5.59597494658092E-06"
-        iyz="-4.57300185110961E-11"
-        izz="1.07544652567121E-05" />
+        ixx="5.6903E-06"
+        ixy="-1.7344E-15"
+        ixz="4.9169E-09"
+        iyy="5.3876E-06"
+        iyz="-1.6461E-13"
+        izz="1.0498E-05" />
     </inertial>
     <visual>
       <origin
@@ -69,17 +69,17 @@
     name="FR_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="-2.31951351493953E-06 4.75087751597436E-07 0.00518072305319314"
+        xyz="2.1939E-06 -9.6836E-07 0.0032361"
         rpy="0 0 0" />
       <mass
         value="0.000170761508616818" />
       <inertia
-        ixx="4.6755014059117E-09"
-        ixy="2.32513739562609E-12"
-        ixz="5.71859115287334E-14"
-        iyy="4.6758546712305E-09"
-        iyz="-1.22257798998163E-12"
-        izz="7.47442921255212E-09" />
+        ixx="4.6764E-09"
+        ixy="2.1939E-12"
+        ixz="2.023E-13"
+        iyy="4.6749E-09"
+        iyz="1.2032E-12"
+        izz="7.4744E-09" />
     </inertial>
     <visual>
       <origin
@@ -107,8 +107,8 @@
     name="FR_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="0.0257492934362308 -0.0229194400056349 -0.00749999999999998"
-      rpy="0 0 0" />
+      xyz="0.022554 -0.023285 0.0066819"
+      rpy="0 0 0.079117" />
     <parent
       link="base_link_$(arg drone_index)" />
     <child
@@ -120,17 +120,17 @@
     name="BR_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="-8.1600715337582E-08 -1.72083848282156E-08 0.00522367470183978"
+        xyz="-5.8103E-08 1.0092E-07 0.0032716"
         rpy="0 0 0" />
       <mass
-        value="0.00018061996609001" />
+        value="0.00018062" />
       <inertia
-        ixx="5.31750986815953E-09"
-        ixy="-5.16314476983196E-15"
-        ixz="9.66455527233112E-16"
-        iyy="5.31754307596758E-09"
-        iyz="1.26078782972358E-14"
-        izz="8.76724562794108E-09" />
+        ixx="5.3175E-09"
+        ixy="1.0972E-14"
+        ixz="9.8184E-15"
+        iyy="5.3175E-09"
+        iyz="2.1136E-14"
+        izz="8.7672E-09" />
     </inertial>
     <visual>
       <origin
@@ -158,8 +158,8 @@
     name="BR_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="-0.0191761230425737 -0.0229194400056349 -0.00749999999999998"
-      rpy="0 0 0" />
+      xyz="-0.022371 -0.023285 0.0063138"
+      rpy="0 0 1.2022" />
     <parent
       link="base_link_$(arg drone_index)" />
     <child
@@ -171,17 +171,17 @@
     name="BL_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="2.38010113044621E-06 -1.38898463120096E-07 0.00518072472347876"
+        xyz="2.1712E-06 -9.7472E-07 0.0032361"
         rpy="0 0 0" />
       <mass
-        value="0.000170760818462595" />
+        value="0.00017076" />
       <inertia
-        ixx="4.67479351796267E-09"
-        ixy="2.15642873143842E-12"
-        ixz="-2.37844642269294E-13"
-        iyy="4.67652605370328E-09"
-        iyz="1.1980550310324E-12"
-        izz="7.47439160543409E-09" />
+        ixx="4.6765E-09"
+        ixy="2.1871E-12"
+        ixz="2.0463E-13"
+        iyy="4.6749E-09"
+        iyz="1.2035E-12"
+        izz="7.4744E-09" />
     </inertial>
     <visual>
       <origin
@@ -209,8 +209,8 @@
     name="BL_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="-0.0191761230425737 0.0236734441396914 -0.00749999999999998"
-      rpy="0 0 0" />
+      xyz="-0.022371 0.023308 0.0063342"
+      rpy="0 0 0.89047" />
     <parent
       link="base_link_$(arg drone_index)" />
     <child
@@ -222,17 +222,17 @@
     name="FL_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="3.80231074056936E-08 6.12791400643464E-08 0.00522368229657419"
+        xyz="-5.892E-08 7.2188E-08 0.0032716"
         rpy="0 0 0" />
       <mass
-        value="0.000180619348875049" />
+        value="0.00018062" />
       <inertia
-        ixx="5.31750546690808E-09"
-        ixy="-1.73067916761242E-14"
-        ixz="7.88814557746303E-15"
-        iyy="5.31749812438277E-09"
-        iyz="-1.38442562224496E-14"
-        izz="8.7672030898276E-09" />
+        ixx="5.3175E-09"
+        ixy="1.8564E-14"
+        ixz="9.451E-15"
+        iyy="5.3175E-09"
+        iyz="8.91E-15"
+        izz="8.7672E-09" />
     </inertial>
     <visual>
       <origin
@@ -260,8 +260,8 @@
     name="FL_joint_$(arg drone_index)"
     type="continuous">
     <origin
-      xyz="0.0257492934362308 0.0236734441396913 -0.00749999999999998"
-      rpy="0 0 0" />
+      xyz="0.022554 0.023308 0.0065293"
+      rpy="0 0 1.2737" />
     <parent
       link="base_link_$(arg drone_index)" />
     <child
@@ -273,17 +273,17 @@
     name="camera_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="-0.0053534367867157 5.60012155745304E-08 0.00209997888295398"
+        xyz="-0.0048462 -3.605E-09 0.0033966"
         rpy="0 0 0" />
       <mass
-        value="0.000254844473496216" />
+        value="0.00025484" />
       <inertia
-        ixx="2.52700381545915E-09"
-        ixy="1.04192854320719E-17"
-        ixz="-1.79532031326891E-15"
-        iyy="1.43070118000395E-09"
-        iyz="4.34605630270488E-15"
-        izz="1.43143838579387E-09" />
+        ixx="1.4307E-09"
+        ixy="4.3461E-15"
+        ixz="1.0419E-17"
+        iyy="1.4314E-09"
+        iyz="-1.7953E-15"
+        izz="2.527E-09" />
     </inertial>
     <visual>
       <origin
@@ -312,8 +312,8 @@
     name="camera_joint_$(arg drone_index)"
     type="fixed">
     <origin
-      xyz="0.0303459244383208 4.86220498038051E-05 -0.00399998047147145"
-      rpy="0 0 0" />
+      xyz="0.019528 0 0.0018103"
+      rpy="0 1.5708 0" />
     <parent
       link="base_link_$(arg drone_index)" />
     <child
@@ -321,6 +321,7 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
   <link
     name="pcb_link_$(arg drone_index)">
     <inertial>
@@ -330,12 +331,12 @@
       <mass
         value="0.00172915830500381" />
       <inertia
-        ixx="4.79318130962085E-08"
-        ixy="1.92841414340502E-10"
-        ixz="3.18428765368808E-10"
-        iyy="2.05435520095623E-07"
-        iyz="-4.50719451470362E-11"
-        izz="2.51263861490945E-07" />
+        ixx="4.222E-08"
+        ixy="-3.0903E-10"
+        ixz="-1.9358E-10"
+        iyy="2.2228E-07"
+        iyz="-4.4002E-11"
+        izz="1.816E-07" />
     </inertial>
     <visual>
       <origin
@@ -359,6 +360,7 @@
       </geometry>
     </collision>
   </link>
+
   <joint
     name="pcb_joint_$(arg drone_index)"
     type="fixed">
@@ -372,21 +374,22 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
   <link
     name="pcb_plate_link_$(arg drone_index)">
     <inertial>
       <origin
-        xyz="0.00022495550644493 6.20412368211587E-06 0.000796328088142936"
+        xyz="0.019372 0.0073905 0.0052491"
         rpy="0 0 0" />
       <mass
-        value="0.00172915383636057" />
+        value="0.0015308" />
       <inertia
-        ixx="4.79319207989059E-08"
-        ixy="1.93051673791148E-10"
-        ixz="3.1844298586841E-10"
-        iyy="2.05435513643283E-07"
-        iyz="-4.50628996738981E-11"
-        izz="2.51263977451861E-07" />
+        ixx="4.222E-08"
+        ixy="-3.0903E-10"
+        ixz="-1.9358E-10"
+        iyy="2.2228E-07"
+        iyz="-4.4002E-11"
+        izz="1.816E-07" />
     </inertial>
     <visual>
       <origin
@@ -410,18 +413,19 @@
       </geometry>
     </collision>
   </link>
+
   <joint
     name="pcb_plate_joint_$(arg drone_index)"
     type="fixed">
     <origin
-      xyz="0 0 0"
-      rpy="0 0 0" />
+      xyz="0.017558 -0.0052305 0.0043123"
+      rpy="1.5708 0 -3.1416" />
     <parent
-      link="base_link_$(arg drone_index)" />
+      link="base_link" />
     <child
-      link="pcb_plate_link_$(arg drone_index)" />
+      link="pcb_plate_link" />
     <axis
-      xyz="0 0 0" />
+      xyz="0 0.63613 0.77159" />
   </joint>
 
   <!-- transmission -->
