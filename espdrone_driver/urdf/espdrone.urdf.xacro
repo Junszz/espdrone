@@ -28,7 +28,11 @@
     name="base_link_$(arg drone_index)">
     <inertial>
       <origin
+<<<<<<< HEAD
         xyz="-8.4922E-05 -5.1889E-06 -0.012067"
+=======
+        xyz="1.1546E-17 -9.6133E-19 1.2281E-18"
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
         rpy="0 0 0" />
       <mass
         value="0.022" />
@@ -69,17 +73,30 @@
     name="FR_link_$(arg drone_index)">
     <inertial>
       <origin
+<<<<<<< HEAD
         xyz="2.19386060301349E-06 -9.68362298764402E-07 0.00323605128895478"
+=======
+        xyz="2.1939E-06 -9.6836E-07 0.0032361"
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
         rpy="0 0 0" />
       <mass
         value="0.000170761508616818" />
       <inertia
+<<<<<<< HEAD
         ixx="4.67644382978833E-09"
         ixy="2.19394380780143E-12"
         ixz="2.02295621851495E-13"
         iyy="4.67485384007775E-09"
         iyz="1.20316619967357E-12"
         izz="7.47437053355022E-09" />
+=======
+        ixx="4.6764E-09"
+        ixy="2.1939E-12"
+        ixz="2.023E-13"
+        iyy="4.6749E-09"
+        iyz="1.2032E-12"
+        izz="7.4744E-09" />
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
     </inertial>
     <visual>
       <origin
@@ -107,7 +124,11 @@
     name="FR_joint_$(arg drone_index)"
     type="continuous">
     <origin
+<<<<<<< HEAD
       xyz="0.022469 -0.02329 -0.0053847"
+=======
+      xyz="0.022554 -0.023285 0.0066819"
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
       rpy="0 0 0.079117" />
     <parent
       link="base_link_$(arg drone_index)" />
@@ -120,17 +141,30 @@
     name="BR_link_$(arg drone_index)">
     <inertial>
       <origin
+<<<<<<< HEAD
         xyz="-7.56440794238977E-08 -2.88324636596449E-08 0.00327154784152278"
+=======
+        xyz="-5.8103E-08 1.0092E-07 0.0032716"
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
         rpy="0 0 0" />
       <mass
         value="0.00018062" />
       <inertia
+<<<<<<< HEAD
         ixx="5.31752179818623E-09"
         ixy="-9.13133512897449E-15"
         ixz="8.05001778605325E-16"
         iyy="5.31754756765752E-09"
         iyz="1.22536182980167E-14"
         izz="8.76725630082634E-09" />
+=======
+        ixx="5.3175E-09"
+        ixy="1.0972E-14"
+        ixz="9.8184E-15"
+        iyy="5.3175E-09"
+        iyz="2.1136E-14"
+        izz="8.7672E-09" />
+>>>>>>> 6b9c0dd6c270949edfab78a9c1be2bbdc6c511fc
     </inertial>
     <visual>
       <origin
@@ -424,7 +458,7 @@
     <child
       link="pcb_plate_link" />
     <axis
-      xyz="0 0 0" />
+      xyz="0 0.63613 0.77159" />
   </joint>
 
   <!-- transmission -->
