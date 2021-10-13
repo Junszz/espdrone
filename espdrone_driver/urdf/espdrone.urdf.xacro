@@ -420,9 +420,9 @@
       xyz="0.017473 -0.0052357 -0.0077544"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="base_link$(arg drone_index)" />
     <child
-      link="pcb_plate_link" />
+      link="pcb_plate_link$(arg drone_index)" />
     <axis
       xyz="0 0.63613 0.77159" />
   </joint>
