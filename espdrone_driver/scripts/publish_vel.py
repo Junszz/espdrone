@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import rospy
 import argparse
@@ -11,8 +11,7 @@ def talker(drone, vel):
     pub3 = rospy.Publisher('/' + drone + '/joint3_velocity_controller/command', Float64, queue_size=10)
     pub4 = rospy.Publisher('/' + drone + '/joint4_velocity_controller/command', Float64, queue_size=10)
 
-    print("publishing...vel -> {vel}")
-    print('/' + drone + '/joint1_velocity_controller/command')
+    print(f"publishing...vel -> {vel} to {drone}")
 
     pub1.publish(int(vel))
     pub2.publish(int(vel))
