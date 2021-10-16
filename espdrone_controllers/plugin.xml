@@ -1,0 +1,23 @@
+<class_libraries>
+  <!--<library path="lib/libhector_quadrotor_controllers">-->
+  <library path="lib/libespdrone_controllers">
+    <class name="espdrone_controllers/AttitudeController" type="espdrone_controllers::AttitudeController"
+           base_class_type="controller_interface::ControllerBase">
+      <description>
+        TODO
+      </description>
+    </class>
+    <class name="espdrone_controllers/VelocityController" type="espdrone_controllers::VelocityController"
+           base_class_type="controller_interface::ControllerBase">
+      <description>
+        TODO
+      </description>
+    </class>
+    <class name="espdrone_controllers/PositionController" type="espdrone_controllers::PositionController"
+           base_class_type="controller_interface::ControllerBase">
+      <description>
+        TODO
+      </description>
+    </class>
+  </library>
+</class_libraries>
