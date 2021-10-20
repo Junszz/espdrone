@@ -1,9 +1,14 @@
 <launch>
   <param name="/use_sim_time" value="true" />'
+  <param name="use_aruco_tf" value="false" />'
+  <param name="image_windows" value="false" />'
+
+  <rosparam param="use_aruco_tf">$(arg use_aruco_tf)</rosparam>
+  <rosparam param="image_windows">$(arg image_windows)</rosparam>
   <!-- start world -->
   <include
     file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find espdrone_driver)/gazebo_world/aruco_world.world"/>
+    <arg name="world_name" value="$(find espdrone_aruco_bringup)/environment/gazebo_world/aruco_world_v2.world"/>
 		<arg name="verbose" value="true"/>
 </include>
   <include file="$(find espdrone_driver)/launch/drones.launch"/>
