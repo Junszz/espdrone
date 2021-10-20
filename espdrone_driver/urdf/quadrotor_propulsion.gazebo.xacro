@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Quadrotor Propulsion -->
+  <xacro:macro name="quadrotor_propulsion">
+			<!-- Uptrust force plugin for propellers -->
+		<gazebo>
+			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
+				<a0>0.1</a0>
+				<cla>0.1</cla>
+				<cda>0.01</cda>
+				<cma>0.0</cma>
+				<alpha_stall>0.2</alpha_stall>
+				<cla_stall>-0.2</cla_stall>
+				<cda_stall>1.0</cda_stall>
+				<cma_stall>0.0</cma_stall>
+				<cp>0 0.5 0</cp>
+				<area>1e-3</area>
+				<air_density>1.2041</air_density>
+				<forward>1 0 0</forward>
+				<upward>0 0 1</upward>
+				<link_name>FL_link_$(arg drone_index)</link_name>
+				<control_joint>FL_joint_$(arg drone_index)</control_joint>
+			</plugin>
+		</gazebo>
+		
+		<gazebo>
+			<!-- Provide a Negative Velocity -->
+			<plugin name="FR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
+				<a0>0.1</a0>
+				<cla>0.1</cla>
+				<cda>0.01</cda>
+				<cma>0.0</cma>
+				<alpha_stall>0.2</alpha_stall>
+				<cla_stall>-0.2</cla_stall>
+				<cda_stall>1.0</cda_stall>
+				<cma_stall>0.0</cma_stall>
+				<cp>0 0.5 0</cp>
+				<area>1e-3</area>
+				<air_density>1.2041</air_density>
+				<forward>1 0 0</forward>
+				<upward>0 0 -1</upward>
+				<link_name>FR_link_$(arg drone_index)</link_name>
+				<control_joint>FR_joint_$(arg drone_index)</control_joint>
+			</plugin>
+		</gazebo>
+		
+		<gazebo>
+			<!-- Provide a Positive Velocity -->
+			<plugin name="BL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
+				<a0>0.1</a0>
+				<cla>0.1</cla>
+				<cda>0.01</cda>
+				<cma>0.0</cma>
+				<alpha_stall>0.2</alpha_stall>
+				<cla_stall>-0.2</cla_stall>
+				<cda_stall>1.0</cda_stall>
+				<cma_stall>0.0</cma_stall>
+				<cp>0 0.5 0</cp>
+				<area>1e-3</area>
+				<air_density>1.2041</air_density>
+				<forward>1 0 0</forward>
+				<upward>0 0 1</upward>
+				<link_name>BL_link_$(arg drone_index)</link_name>
+				<control_joint>BL_joint_$(arg drone_index)</control_joint>
+			</plugin>
+		</gazebo>
+		
+		<gazebo>
+			<!-- Provide a Positive Velocity -->
+			<plugin name="BR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
+				<a0>0.1</a0>
+				<cla>0.1</cla>
+				<cda>0.01</cda>
+				<cma>0.0</cma>
+				<alpha_stall>0.2</alpha_stall>
+				<cla_stall>-0.2</cla_stall>
+				<cda_stall>1.0</cda_stall>
+				<cma_stall>0.0</cma_stall>
+				<cp>0 0.5 0</cp>
+				<area>1e-3</area>
+				<air_density>1.2041</air_density>
+				<forward>1 0 0</forward>
+				<upward>0 0 1</upward>
+				<link_name>BR_link_$(arg drone_index)</link_name>
+				<control_joint>BR_joint_$(arg drone_index)</control_joint>
+			</plugin>
+		</gazebo>
+  </xacro:macro>
+
+</robot>
+
