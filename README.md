@@ -63,6 +63,8 @@ catkin build
 source devel/setup.bash
 ```
 
+6. Clone 
+
 This should build the directory without any errors. If you find any errors, please check your steps with those mentioned here.
 
 Once installed, close the terminal. Open another terminal and load the quadcopter into gazebo simulator
