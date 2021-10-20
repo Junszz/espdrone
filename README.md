@@ -12,6 +12,8 @@ All the mass, moment of inertia etc are calibrated and is identical to the real 
 
 Any progress/add-ons will be updated in this reposity.
 
+Requires 'simulator-aruco-ros' from yuxi repo.
+
 # Installation #
 
 Make sure you've installed ROS and Gazebo on your systems. A docker container with ROS environment is required to run this project on a Windows machine.
@@ -60,6 +62,8 @@ cd ~/catkin_ws
 catkin build
 source devel/setup.bash
 ```
+
+6. Clone 
 
 This should build the directory without any errors. If you find any errors, please check your steps with those mentioned here.
 
