@@ -5,7 +5,6 @@
 	<arg name="R" default="0.0" />
 	<arg name="P" default="0.0" />
 	<arg name="Y" default="0.0" />
-	<arg name="name" default="espdrone" />
   <arg name="frame" default="base_footprint" />
   <arg name="worldFrame" default="world_frame" />
   <arg name="drone_index" default="1" />
@@ -17,7 +16,7 @@
     pkg="gazebo_ros"
     type="spawn_model"
     respawn="false"
-    args="-model $(arg name) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
+    args="-model drone$(arg drone_index) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
     output="screen" />
 
   <!--node name="controller" pkg="espdrone_controller" type="controller" output="screen" ns="/$(arg name)" >
@@ -28,11 +27,11 @@
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" />
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/$(arg name)" args="joint1_velocity_controller joint2_velocity_controller joint3_velocity_controller joint4_velocity_controller joint_state_controller"/>
+    output="screen" ns="/drone$(arg drone_index)" args="joint1_velocity_controller joint2_velocity_controller joint3_velocity_controller joint4_velocity_controller joint_state_controller"/>
   <!-- convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
     respawn="false" output="screen">
-    <remap from="/joint_states" to="/$(arg name)/joint_states" />
+    <remap from="/joint_states" to="/drone$(arg drone_index)/joint_states" />
   </node>
   
   <include file="$(find espdrone_aruco_bringup)/launch/espdrone_aruco.launch" >
