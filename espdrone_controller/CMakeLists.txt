@@ -1,64 +1,70 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(espdrone_controller)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED COMPONENTS
-    std_msgs
-    tf
+  roscpp 
+  geometry_msgs 
+  sensor_msgs 
+  nav_msgs 
+  espdrone_msgs 
+  std_srvs 
+  hardware_interface 
+  controller_interface
 )
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+## System dependencies are found with CMake's conventions
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES espdrone_controller
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+    INCLUDE_DIRS include
+    LIBRARIES espdrone_controller
+    CATKIN_DEPENDS roscpp geometry_msgs sensor_msgs nav_msgs espdrone_msgs std_srvs hardware_interface controller_interface
+    DEPENDS
 )
 
 ###########
 ## Build ##
 ###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-    ${catkin_INCLUDE_DIRS}
+add_library(espdrone_controller src/quadrotor_interface.cpp src/pid.cpp)
+target_link_libraries(espdrone_controller ${catkin_LIBRARIES})
+add_dependencies(espdrone_controller espdrone_msgs_generate_messages_cpp)
+
+add_library(espdrone_pose_controller src/pose_controller.cpp)
+target_link_libraries(espdrone_pose_controller espdrone_controller)
+
+add_library(espdrone_twist_controller src/twist_controller.cpp)
+target_link_libraries(espdrone_twist_controller espdrone_controller ${BOOST_LIBRARIES})
+
+add_library(espdrone_motor_controller src/motor_controller.cpp)
+target_link_libraries(espdrone_motor_controller espdrone_controller)
+
+#############
+## Install ##
+#############
+
+install(TARGETS espdrone_controller espdrone_pose_controller espdrone_twist_controller espdrone_motor_controller
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-## Declare a C++ executable
-add_executable(controller src/controller.cpp)
+## Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)
 
-# Specify libraries to link a library or executable target against
-target_link_libraries(controller ${catkin_LIBRARIES})
+## Mark other files for installation (e.g. launch and bag files, etc.)
+install(DIRECTORY launch params DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(FILES
+  plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
