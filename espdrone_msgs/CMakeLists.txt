@@ -5,47 +5,43 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   geometry_msgs
+  actionlib_msgs
 )
 
 add_service_files(FILES
-#  AddEspdrone.srv
-#  Enable.srv
-  GoTo.srv
-  Land.srv
-#  RemoveEspdrone.srv
-#  SetGroupMask.srv
-#  StartTrajectory.srv
-  Stop.srv
-#  BsValid.srv
-  Takeoff.srv
-#  UpdateParams.srv
-#  Motors.srv
-#  UploadTrajectory.srv
-#  LoadLighthouseGeo.srv
+  EnableMotors.srv
 )
 
 add_message_files(FILES
-#  LogBlock.msg
-#  GenericLogData.msg
-#  FullState.msg
-#  VelocityWorld.msg
-#  TrajectoryPolynomialPiece.msg
-#  Hover.msg
-#  MotorStatus.msg
-#  TofMeasurement.msg
-  Position.msg
-#  BatteryStatus.msg
-#  LighthouseGeo.msg
+  Altimeter.msg
+  AttitudeCommand.msg
+  Compass.msg
+  ControllerState.msg
+  HeadingCommand.msg
+  HeightCommand.msg
+  MotorCommand.msg
+  MotorPWM.msg
+  MotorStatus.msg
+  PositionXYCommand.msg
+  RawImu.msg
+  RawMagnetic.msg
+  RawRC.msg
+  RC.msg
+  RuddersCommand.msg
+  ServoCommand.msg
+  Supply.msg
+  ThrustCommand.msg
+  VelocityXYCommand.msg
+  VelocityZCommand.msg
+  YawrateCommand.msg
 )
 
 generate_messages(DEPENDENCIES
+  actionlib_msgs
   std_msgs
   geometry_msgs
 )
 
 catkin_package(
-CATKIN_DEPENDS
-  message_runtime
-  std_msgs
-  geometry_msgs
+  CATKIN_DEPENDS message_runtime std_msgs
 )
