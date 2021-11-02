@@ -34,8 +34,14 @@
     <remap from="/joint_states" to="/drone$(arg drone_index)/joint_states" />
   </node>
   
+<<<<<<< HEAD
   <!--<include file="$(find espdrone_aruco_bringup)/launch/espdrone_aruco.launch" >
     <arg name="drone_index" value="$(arg drone_index)" />
   </include> -->
+=======
+  <include file="$(find espdrone_aruco_bringup)/launch/espdrone_aruco.launch" >
+    <arg name="drone_index" value="$(arg drone_index)" />
+  </include>
+>>>>>>> 594ff9c985efebc4ef2df35b4159c5afd7d44ff9
 
 </launch>
