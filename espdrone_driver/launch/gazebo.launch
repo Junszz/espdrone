@@ -1,5 +1,6 @@
 <launch>
   <rosparam file="$(find espdrone_driver)/config/config.yaml" command="load"/>
+  <param name="robot_description" textfile="$(find espdrone_driver)/urdf/espdrone.urdf.xacro" />
 
   <include
     file="$(find gazebo_ros)/launch/empty_world.launch" />

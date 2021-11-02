@@ -43,11 +43,7 @@
       <arg name="name"  value="drone3" />
     </include>
   </group-->
-<<<<<<< HEAD
--g="espdrone_driver" type="tf_broadcaster_imu.py" output="screen"/-->
-=======
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find espdrone_driver)/config/espdrone.rviz" required="true" />
   <!--node name="tf_publisher" pkg="espdrone_driver" type="tf_broadcaster_imu.py" output="screen"/-->
->>>>>>> 594ff9c985efebc4ef2df35b4159c5afd7d44ff9
 </launch>

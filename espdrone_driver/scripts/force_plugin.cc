@@ -23,36 +23,45 @@ namespace gazebo
 {
   class GazeboEspdroneDriver : public ModelPlugin
   {
-    public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
+    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     {
       // Store the pointer to the model
-      this->model = _parent;
+      this->model = _model;
+      this->robot_namespace_ = "";
+      if (_sdf->HasElement("robotNamespace"))
+        this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
-      this->link = _parent->GetLink();
+      if (!_sdf->HasElement("linkName"))
+      {
+        ROS_FATAL_NAMED("force plugin", "force plugin missing <linkName>, cannot proceed");
+        return;
+      }
+
+      else
+        this->link_name = _sdf->GetElement("linkName")->Get<std::string>();
+
+      this->link = _model->GetLink(this->link_name);
 
       // Listen to the update event. This event is broadcast every simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           std::bind(&GazeboEspdroneDriver::OnUpdate, this));
-      
-      //get the name of the link in string format
-      std::string link_name = this->link->GetName().c_str();
-      std::string model_name = _parent->GetName().c_str();
+  
 
       // subscribing topic name, ex drone2/FL_link_2/wrench
-      std::string wrench_topic = "/" + model_name + "/" + link_name + "/wrench";
+      std::string wrench_topic = "/" + this->robot_namespace_ + "/" + this->link_name + "/wrench";
 
       // Initialize ros, if it has not already been initialized.
       if (!ros::isInitialized())
       {
         int argc = 0;
         char **argv = NULL;
-        ros::init(argc, argv, link_name + "_motor_driver",
+        ros::init(argc, argv, this->link_name + "_motor_driver",
             ros::init_options::NoSigintHandler);
       }
          
       // Create our ROS node. This acts in a similar manner to
       // the Gazebo node
-      this->rosNode.reset(new ros::NodeHandle(link_name + "_motor_driver"));
+      this->rosNode.reset(new ros::NodeHandle(this->link_name + "_motor_driver"));
       
       // initialize subscriber to wrench topic
       ros::SubscribeOptions so =
@@ -100,7 +109,11 @@ namespace gazebo
 
     
     private: ignition::math::Vector3d link_force;
-    // Pointer to the model and link
+    private: std::string robot_namespace_;
+    /// \brief A pointer to the Gazebo joint
+
+    private: std::string link_name;
+
     private: physics::ModelPtr model;
     private: physics::LinkPtr link;
     // Pointer to the update event connection
