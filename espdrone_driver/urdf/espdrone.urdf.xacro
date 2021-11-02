@@ -426,7 +426,7 @@
     <axis
       xyz="0 0.63613 0.77159" />
   </joint>
-  
+
   <!-- transmission -->
   <transmission name="FL_trans_$(arg drone_index)">
     <type>transmission_interface/SimpleTransmission</type>
@@ -476,10 +476,10 @@
 		<provideFeedback>true</provideFeedback>
   </gazebo>
 
-   <gazebo>
+   <!-- <gazebo>
     <controller:gazebo_force_plugin name="gazebo_force_plugin" plugin="libgazebo_force_plugin.so">
     		<jointName>BR_joint_$(arg drone_index)</jointName>
     </controller:gazebo_force_plugin>
-  </gazebo>
+  </gazebo> -->
 
 </robot>

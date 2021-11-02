@@ -99,20 +99,9 @@
 		    </plugin>
 		  </sensor>
 		</gazebo>
-		    
-			<!-- Ground truth plugin -->
-		<!-- <gazebo>
-			<plugin name="quadrotor_groundtruth_sim" filename="libgazebo_ros_p3d.so">
-            <updateRate>100.0</updateRate>
-            <bodyName>base_link</bodyName>
-            <topicName>ground_truth/state</topicName>
-            <gaussianNoise>0.0</gaussianNoise>
-            <frameName>$(arg world_frame)</frameName>
-			</plugin>
-		</gazebo> -->
 
 			<!-- Uptrust force plugin for propellers -->
-		<gazebo>
+	<gazebo>
 			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -214,13 +203,6 @@
 		<jointName>BR_joint_$(arg drone_index)</jointName>
 		</plugin>
   	</gazebo>
-
-	<!-- <gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<jointName>BR_joint_$(arg drone_index)</jointName>
-		</plugin>
-  	</gazebo> -->
-
 	<gazebo>
 		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
 		<updateRate>10.0</updateRate>
