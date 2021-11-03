@@ -54,7 +54,7 @@ public:
 
   ~TwistController()
   {}
-
+  
   bool init(QuadrotorInterface *interface, ros::NodeHandle &root_nh, ros::NodeHandle &controller_nh)
   {
     // get interface handles
