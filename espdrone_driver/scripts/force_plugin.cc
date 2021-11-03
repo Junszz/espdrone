@@ -1,10 +1,4 @@
-/*
-TODO: 
-1) combine with espdrones with adding something: <plugin name="model_push_plugin" filename="libmodel_push_plugin.so"/> in urdf
-2) make sure the code works
-3) publish wrench to topic /<link_name>/wrench for testing
-4) if success, combine with controller 
-*/
+
 #include <functional>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -17,7 +11,7 @@ TODO:
 #include "std_msgs/Float32.h"
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
-#include <geometry_msgs/WrenchStamped.h>
+#include <geometry_msgs/Wrench.h>
 
 namespace gazebo
 {
@@ -65,7 +59,7 @@ namespace gazebo
       
       // initialize subscriber to wrench topic
       ros::SubscribeOptions so =
-        ros::SubscribeOptions::create<geometry_msgs::WrenchStamped>(
+        ros::SubscribeOptions::create<geometry_msgs::Wrench>(
             wrench_topic,
             1,
             boost::bind(&GazeboEspdroneDriver::OnRosMsg, this, _1),
@@ -90,10 +84,10 @@ namespace gazebo
     }
     
     
-    public: void OnRosMsg(const geometry_msgs::WrenchStamped::ConstPtr &msg)
+    public: void OnRosMsg(const geometry_msgs::Wrench::ConstPtr &msg)
     {
-      //extract force from wrench stamped message and changed it to vector3d
-      ignition::math::Vector3d force_3d(msg -> wrench.force.x, msg -> wrench.force.y, msg -> wrench.force.z);
+      //extract force from wrench message and changed it to vector3d
+      ignition::math::Vector3d force_3d(msg -> force.x, msg -> force.y, msg -> force.z);
       this->link_force = ignition::math::Vector3d(force_3d);
     }
     
