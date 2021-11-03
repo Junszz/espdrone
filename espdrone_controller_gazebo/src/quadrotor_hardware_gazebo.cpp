@@ -35,7 +35,7 @@ namespace espdrone_controller_gazebo {
 QuadrotorHardwareSim::QuadrotorHardwareSim()
 {
   this->registerInterface(static_cast<QuadrotorInterface *>(this));
-
+  // get current wrench & motor power from interface
   wrench_output_ = addInput<WrenchCommandHandle>("wrench");
   motor_output_ = addInput<MotorCommandHandle>("motor");
 }
@@ -135,6 +135,7 @@ void QuadrotorHardwareSim::stateCallback(const nav_msgs::OdometryConstPtr &state
   twist_ = state->twist.twist;
 }
 
+//callback
 void QuadrotorHardwareSim::imuCallback(const sensor_msgs::ImuConstPtr &imu) {
   imu_ = *imu;
 }
