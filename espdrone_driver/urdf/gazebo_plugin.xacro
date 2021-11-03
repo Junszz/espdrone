@@ -207,21 +207,43 @@
 	<gazebo reference="FL_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
     </gazebo>
-	<gazebo>
+	<!-- <gazebo>
 		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
 		<updateRate>10.0</updateRate>
 		<topicName>BR_joint_sensor</topicName>
 		<jointName>BR_joint_$(arg drone_index)</jointName>
 		</plugin>
-  	</gazebo>
-
-	<!-- <gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<jointName>BR_joint_$(arg drone_index)</jointName>
-		</plugin>
   	</gazebo> -->
 
 	<gazebo>
+		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
+		<robotNamespace>drone$(arg drone_index)</robotNamespace>
+		<linkName>BR_link_$(arg drone_index)</linkName>
+		</plugin>
+  	</gazebo>
+
+	<gazebo>
+		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
+		<robotNamespace>drone$(arg drone_index)</robotNamespace>
+		<linkName>BL_link_$(arg drone_index)</linkName>
+		</plugin>
+  	</gazebo>
+	
+	<gazebo>
+		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
+		<robotNamespace>drone$(arg drone_index)</robotNamespace>
+		<linkName>FL_link_$(arg drone_index)</linkName>
+		</plugin>
+  	</gazebo>
+	
+	<gazebo>
+		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
+		<robotNamespace>drone$(arg drone_index)</robotNamespace>
+		<linkName>FR_link_$(arg drone_index)</linkName>
+		</plugin>
+  	</gazebo>
+
+	<!-- <gazebo>
 		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
 		<updateRate>10.0</updateRate>
 		<topicName>BL_joint_sensor</topicName>
@@ -241,7 +263,8 @@
 		<topicName>FL_joint_sensor</topicName>
 		<jointName>FL_joint_$(arg drone_index)</jointName>
 		</plugin>
-  	</gazebo>
+  	</gazebo> -->
+	
   <!-- ros_control plugin --> 
   <gazebo> 
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> 

@@ -2,6 +2,7 @@
 <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<!-- total mass of the drone is approx. 25 grams -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="espdrone">
 <xacro:include filename="$(find espdrone_driver)/urdf/gazebo_plugin.xacro" />
 <xacro:arg name="drone_index" default="1" />
@@ -31,7 +32,7 @@
         xyz="-8.4922E-05 -5.1889E-06 -0.012067"
         rpy="0 0 0" />
       <mass
-        value="0.022" />
+        value="0.018" />
       <inertia
         ixx="5.69029262704911E-06"
         ixy="-1.73442408668395E-15"
@@ -50,9 +51,6 @@
       </geometry>
       <material
         name="white">
-<!--
-        <color
-          rgba="1 1 1 1" />  -->
       </material>
     </visual>
     <collision>
@@ -72,7 +70,7 @@
         xyz="2.19386060301349E-06 -9.68362298764402E-07 0.00323605128895478"
         rpy="0 0 0" />
       <mass
-        value="0.000170761508616818" />
+        value="0.001" />
       <inertia
         ixx="4.67644382978833E-09"
         ixy="2.19394380780143E-12"
@@ -123,7 +121,7 @@
         xyz="-7.56440794238977E-08 -2.88324636596449E-08 0.00327154784152278"
         rpy="0 0 0" />
       <mass
-        value="0.00018062" />
+        value="0.001" />
       <inertia
         ixx="5.31752179818623E-09"
         ixy="-9.13133512897449E-15"
@@ -174,7 +172,7 @@
         xyz="2.1712E-06 -9.7472E-07 0.0032361"
         rpy="0 0 0" />
       <mass
-        value="0.00017076" />
+        value="0.001" />
       <inertia
         ixx="4.6765E-09"
         ixy="2.1871E-12"
@@ -225,7 +223,7 @@
         xyz="-8.62749092375714E-08 -3.52031720891877E-08 0.00327155903890045"
         rpy="0 0 0" />
       <mass
-        value="0.000180619564419041" />
+        value="0.001" />
       <inertia
         ixx="5.31748216155639E-09"
         ixy="-9.62023286312814E-15"
@@ -276,7 +274,7 @@
         xyz="0.0033966 -3.605E-09 0.0048462"
         rpy="0 0 0" />
       <mass
-        value="0.00025484" />
+        value="0.001" />
       <inertia
         ixx="2.527E-09"
         ixy="-1.7953E-15"
@@ -328,7 +326,7 @@
         xyz="-0.0193719085455067 0.00524912091328601 0.00739049052905435"
         rpy="0 0 0" />
       <mass
-        value="0.00172915830500381" />
+        value="0.001" />
       <inertia
         ixx="4.22200930314278E-08"
         ixy="1.93579463454107E-10"
@@ -381,7 +379,7 @@
         xyz="-0.0193719085455067 0.00524912091328601 0.00739049052905435"
         rpy="0 0 0" />
       <mass
-        value="0.00153077609060128" />
+        value="0.001" />
       <inertia
         ixx="4.22200930314278E-08"
         ixy="1.93579463454107E-10"
@@ -475,11 +473,5 @@
 	<gazebo reference="BR_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
   </gazebo>
-
-   <!-- <gazebo>
-    <controller:gazebo_force_plugin name="gazebo_force_plugin" plugin="libgazebo_force_plugin.so">
-    		<jointName>BR_joint_$(arg drone_index)</jointName>
-    </controller:gazebo_force_plugin>
-  </gazebo> -->
 
 </robot>
