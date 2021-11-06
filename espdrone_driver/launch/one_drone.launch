@@ -20,7 +20,7 @@
     args="-model drone$(arg drone_index) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
     output="screen" />
 
-  <include file="$(find espdrone_controller)/launch/controller.launch"/>
+  <!-- <include file="$(find espdrone_controller)/launch/controller.launch"/> -->
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" />
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
