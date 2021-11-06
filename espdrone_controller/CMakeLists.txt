@@ -33,18 +33,8 @@ catkin_package(
 ## Build ##
 ###########
 
-add_library(espdrone_controller src/quadrotor_interface.cpp src/pid.cpp)
-target_link_libraries(espdrone_controller ${catkin_LIBRARIES})
-add_dependencies(espdrone_controller espdrone_msgs_generate_messages_cpp)
-
-add_library(espdrone_pose_controller src/pose_controller.cpp)
+add_library(espdrone_pose_controller src/espdrone_controller.cpp)
 target_link_libraries(espdrone_pose_controller espdrone_controller)
-
-add_library(espdrone_twist_controller src/twist_controller.cpp)
-target_link_libraries(espdrone_twist_controller espdrone_controller ${BOOST_LIBRARIES})
-
-add_library(espdrone_motor_controller src/motor_controller.cpp)
-target_link_libraries(espdrone_motor_controller espdrone_controller)
 
 #############
 ## Install ##

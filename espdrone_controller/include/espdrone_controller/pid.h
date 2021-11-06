@@ -18,7 +18,23 @@ public:
     double limit_i;
     double limit_output;
   } parameters_;
-
+    pose:
+        type: espdrone_controller/PoseController
+        xy:
+            k_p: 2.0
+            k_i: 0.0
+            k_d: 0.0
+            limit_output: 5.0
+        z:
+            k_p: 2.0
+            k_i: 0.0
+            k_d: 0.0
+            limit_output: 5.0
+        yaw:
+            k_p: 2.0
+            k_i: 0.0
+            k_d: 0.0
+            limit_output: 1.0
   struct state {
     state();
     double p, i, d;
