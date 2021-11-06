@@ -1,36 +1,7 @@
-//=================================================================================================
-// Copyright (c) 2013, Johannes Meyer, TU Darmstadt
-// All rights reserved.
+// espdrone controller
+// end goal is to pub to <link>/wrench 
 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the Flight Systems and Automatic Control group,
-//       TU Darmstadt, nor the names of its contributors may be used to
-//       endorse or promote products derived from this software without
-//       specific prior written permission.
-
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//=================================================================================================
-
-#include <espdrone_controller/quadrotor_interface.h>
 #include <espdrone_controller/pid.h>
-
-#include <controller_interface/controller.h>
-
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <std_srvs/Empty.h>
@@ -44,9 +15,7 @@
 
 namespace espdrone_controller {
 
-using namespace controller_interface;
-
-class TwistController : public controller_interface::Controller<QuadrotorInterface>
+class TwistController : public controller_twist
 {
 public:
   TwistController()
@@ -54,21 +23,23 @@ public:
 
   ~TwistController()
   {}
-  
-  bool init(QuadrotorInterface *interface, ros::NodeHandle &root_nh, ros::NodeHandle &controller_nh)
+
+  bool init(ros::NodeHandle &root_nh, ros::NodeHandle &controller_nh)
   {
-    // get interface handles
-    pose_          = interface->getPose();
-    twist_         = interface->getTwist();
-    acceleration_  = interface->getAcceleration();
-    twist_input_   = interface->addInput<TwistCommandHandle>("twist");
-    wrench_output_ = interface->addOutput<WrenchCommandHandle>("wrench");
-    node_handle_ = root_nh;
+    // get init params (only once during startup)
+    goal_linear_velocity = 0.0;
+    goal_angular_velocity = 0.0;
+    // pose consist of x_ref, y_ref, z_ref
+    mass_ = 0.026 //26 grams
+    // inertia in the form of ixx, iyy, izz
+    inertia_[3] = [5.69029262704911E-06, 5.38757483059318E-06, 1.04978709710599E-05]
+    pose_ =  
+
 
     // subscribe to commanded twist (geometry_msgs/TwistStamped) and cmd_vel (geometry_msgs/Twist)
     twist_subscriber_ = node_handle_.subscribe<geometry_msgs::TwistStamped>("command/twist", 1, boost::bind(&TwistController::twistCommandCallback, this, _1));
     cmd_vel_subscriber_ = node_handle_.subscribe<geometry_msgs::Twist>("cmd_vel", 1, boost::bind(&TwistController::cmd_velCommandCallback, this, _1));
-
+    
     // engage/shutdown service servers
     engage_service_server_ = node_handle_.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", boost::bind(&TwistController::engageCallback, this, _1, _2));
     shutdown_service_server_ = node_handle_.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", boost::bind(&TwistController::shutdownCallback, this, _1, _2));
@@ -90,15 +61,14 @@ public:
     controller_nh.getParam("limits/torque/z", limits_.torque.z);
     root_nh.param<std::string>("base_link_frame", base_link_frame_, "base_link");
 
-    // get mass and inertia from QuadrotorInterface
-    interface->getMassAndInertia(mass_, inertia_);
+    // equate mass = 26g if necessary
 
     command_given_in_stabilized_frame_ = false;
 
     return true;
   }
 
-  void reset()
+    void reset()
   {
     pid_.linear.x.reset();
     pid_.linear.y.reset();
@@ -120,6 +90,8 @@ public:
 
   void twistCommandCallback(const geometry_msgs::TwistStampedConstPtr& command)
   {
+    // mutex is used to avoid race condition
+    // lock(), unlock()
     boost::mutex::scoped_lock lock(command_mutex_);
 
     command_ = *command;
@@ -129,19 +101,22 @@ public:
     // start controller if it not running
     if (!isRunning()) this->startRequest(command_.header.stamp);
   }
-
+    
   void cmd_velCommandCallback(const geometry_msgs::TwistConstPtr& command)
   {
     boost::mutex::scoped_lock lock(command_mutex_);
 
     command_.twist = *command;
     command_.header.stamp = ros::Time::now();
+    goal_linear_velocity = command_.twist->linear.x;
+    goal_angular_velocity = command_.twiss->angular.z;
+
     command_given_in_stabilized_frame_ = true;
 
     // start controller if it not running
     if (!isRunning()) this->startRequest(command_.header.stamp);
   }
-
+  
   bool engageCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
   {
     boost::mutex::scoped_lock lock(command_mutex_);
@@ -160,7 +135,7 @@ public:
     return true;
   }
 
-  void starting(const ros::Time &time)
+    void starting(const ros::Time &time)
   {
     reset();
     wrench_output_->start();
@@ -176,7 +151,9 @@ public:
     boost::mutex::scoped_lock lock(command_mutex_);
 
     // Get twist command input
+    
     if (twist_input_->connected() && twist_input_->enabled()) {
+      // replace getcommand directly with linear and angular values
       command_.twist = twist_input_->getCommand();
       command_given_in_stabilized_frame_ = false;
     }
@@ -200,7 +177,10 @@ public:
     }
 
     // Get gravity and load factor
+    // load factor is equal to 1 when the aircraft is static on the ground
     const double gravity = 9.8065;
+
+    // calculation of load factor
     double load_factor = 1. / (  pose_->pose().orientation.w * pose_->pose().orientation.w
                                  - pose_->pose().orientation.x * pose_->pose().orientation.x
                                  - pose_->pose().orientation.y * pose_->pose().orientation.y
@@ -232,6 +212,8 @@ public:
         ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
       }
     }
+
+  //publisher to publish output
 
     // Update output
     if (motors_running_) {
@@ -274,6 +256,33 @@ public:
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
 
+      // compute motor output 
+      double nominal_thrust_per_motor = wrench_.wrench.force.z / 4.0;
+      // 3 propellers so divided by 3, torque = F x l
+      // set the wrench to this format /drone_$(arg drone_index)/BL_link_2/wrench
+      motor_.force[0] =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 3.0 / parameters_.lever;
+      motor_.force[1] =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 3.0 / parameters_.lever;
+      motor_.force[2] =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 3.0 / parameters_.lever;
+      motor_.force[3] =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 3.0 / parameters_.lever;
+
+      // convert force to rpm, then pub to joint_state_controller
+
+      // double nominal_torque_per_motor = wrench_.wrench.torque.z / 4.0;
+      // motor_.voltage[0] = motor_.force[0] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[1] = motor_.force[1] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[2] = motor_.force[2] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[3] = motor_.force[3] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
+
+      // motor_.torque[0] = motor_.voltage[0] * parameters_.torque_per_voltage;
+      // motor_.torque[1] = motor_.voltage[1] * parameters_.torque_per_voltage;
+      // motor_.torque[2] = motor_.voltage[2] * parameters_.torque_per_voltage;
+      // motor_.torque[3] = motor_.voltage[3] * parameters_.torque_per_voltage;
+
+      if (motor_.voltage[0] < 0.0) motor_.voltage[0] = 0.0;
+      if (motor_.voltage[1] < 0.0) motor_.voltage[1] = 0.0;
+      if (motor_.voltage[2] < 0.0) motor_.voltage[2] = 0.0;
+      if (motor_.voltage[3] < 0.0) motor_.voltage[3] = 0.0;
+
     } else {
       reset();
     }
@@ -281,6 +290,7 @@ public:
     // set wrench output
     wrench_.header.stamp = time;
     wrench_.header.frame_id = base_link_frame_;
+    // instead of using setcommand, change to rostopic publish
     wrench_output_->setCommand(wrench_.wrench);
   }
 
@@ -294,6 +304,7 @@ private:
   ros::NodeHandle node_handle_;
   ros::Subscriber twist_subscriber_;
   ros::Subscriber cmd_vel_subscriber_;
+  ros::Subscriber imu_topic_;
   ros::ServiceServer engage_service_server_;
   ros::ServiceServer shutdown_service_server_;
 
@@ -322,7 +333,7 @@ private:
 
 };
 
-} // namespace espdrone_controller
+}
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(espdrone_controller::TwistController, controller_interface::ControllerBase)
+
+}

@@ -1,21 +1,4 @@
 controller:
-    pose:
-        type: espdrone_controller/PoseController
-        xy:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 5.0
-        z:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 5.0
-        yaw:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 1.0
     twist:
         type: espdrone_controller/TwistController
         linear/xy:
@@ -46,5 +29,3 @@ controller:
             force/z: 30.0
             torque/xy: 10.0
             torque/z: 1.0
-    motor:
-        type: espdrone_controller/MotorController
