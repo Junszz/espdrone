@@ -10,6 +10,7 @@
   <arg name="drone_index" default="1" />
 
   <param name="robot_description" command="$(find xacro)/xacro '$(find espdrone_driver)/urdf/espdrone.urdf.xacro' drone_index:=$(arg drone_index)"/>
+  <param name="imu_topic" value="/drone$(arg drone_index)/imu" />
 
   <node
     name="spawn_model"
@@ -19,11 +20,7 @@
     args="-model drone$(arg drone_index) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
     output="screen" />
 
-  <!--node name="controller" pkg="espdrone_controller" type="controller" output="screen" ns="/$(arg name)" >
-    <param name="frame" value="/$(arg name)_tf/$(arg frame)" />
-    <param name="worldFrame" value="$(arg worldFrame)" />
-    <rosparam command="load" file="$(find espdrone_controller)/config/espdrone.yaml" />
-  </node-->
+  <!-- <include file="$(find espdrone_controller)/launch/controller.launch"/> -->
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" />
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"

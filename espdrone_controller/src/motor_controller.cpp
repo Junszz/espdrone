@@ -66,9 +66,10 @@ public:
     node_handle_ = new ros::NodeHandle(root_nh);
 
     // load parameters
+    // i.e base_link_$(arg drone_index)
     controller_nh.getParam("force_per_voltage", parameters_.force_per_voltage = 0.559966216);
-    controller_nh.getParam("torque_per_voltage", parameters_.torque_per_voltage = 7.98598e-3);
-    controller_nh.getParam("lever", parameters_.lever = 0.275);
+    // controller_nh.getParam("torque_per_voltage", parameters_.torque_per_voltage = 7.98598e-3);
+    controller_nh.getParam("lever", parameters_.lever = 0.05);
     root_nh.param<std::string>("base_link_frame", base_link_frame_, "base_link");
 
     // TODO: calculate these parameters from the quadrotor_propulsion parameters
@@ -129,21 +130,25 @@ public:
     if (wrench_.wrench.force.z > 0.0) {
 
       double nominal_thrust_per_motor = wrench_.wrench.force.z / 4.0;
-      motor_.force[0] =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 2.0 / parameters_.lever;
-      motor_.force[1] =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 2.0 / parameters_.lever;
-      motor_.force[2] =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 2.0 / parameters_.lever;
-      motor_.force[3] =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 2.0 / parameters_.lever;
+      // 3 propellers so divided by 3, torque = F x l
+      // set the wrench to this format /drone_$(arg drone_index)/BL_link_2/wrench
+      motor_.force[0] =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 3.0 / parameters_.lever;
+      motor_.force[1] =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 3.0 / parameters_.lever;
+      motor_.force[2] =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 3.0 / parameters_.lever;
+      motor_.force[3] =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 3.0 / parameters_.lever;
 
-      double nominal_torque_per_motor = wrench_.wrench.torque.z / 4.0;
-      motor_.voltage[0] = motor_.force[0] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
-      motor_.voltage[1] = motor_.force[1] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
-      motor_.voltage[2] = motor_.force[2] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
-      motor_.voltage[3] = motor_.force[3] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // convert force to rpm, then pub to joint_state_controller
 
-      motor_.torque[0] = motor_.voltage[0] * parameters_.torque_per_voltage;
-      motor_.torque[1] = motor_.voltage[1] * parameters_.torque_per_voltage;
-      motor_.torque[2] = motor_.voltage[2] * parameters_.torque_per_voltage;
-      motor_.torque[3] = motor_.voltage[3] * parameters_.torque_per_voltage;
+      // double nominal_torque_per_motor = wrench_.wrench.torque.z / 4.0;
+      // motor_.voltage[0] = motor_.force[0] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[1] = motor_.force[1] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[2] = motor_.force[2] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
+      // motor_.voltage[3] = motor_.force[3] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
+
+      // motor_.torque[0] = motor_.voltage[0] * parameters_.torque_per_voltage;
+      // motor_.torque[1] = motor_.voltage[1] * parameters_.torque_per_voltage;
+      // motor_.torque[2] = motor_.voltage[2] * parameters_.torque_per_voltage;
+      // motor_.torque[3] = motor_.voltage[3] * parameters_.torque_per_voltage;
 
       if (motor_.voltage[0] < 0.0) motor_.voltage[0] = 0.0;
       if (motor_.voltage[1] < 0.0) motor_.voltage[1] = 0.0;
@@ -175,7 +180,7 @@ private:
 
   struct {
     double force_per_voltage;     // coefficient for linearized volts to force conversion for a single motor [N / V]
-    double torque_per_voltage;    // coefficient for linearized volts to force conversion for a single motor [Nm / V]
+    // double torque_per_voltage;    // coefficient for linearized volts to force conversion for a single motor [Nm / V]
     double lever;                 // the lever arm from origin to the motor axes (symmetry assumption) [m]
   } parameters_;
 };

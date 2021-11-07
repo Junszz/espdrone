@@ -68,3 +68,13 @@ install(FILES
   plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+foreach(dir config launch params meshes urdf)
+	install(DIRECTORY ${dir}/
+		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach(dir)
+
+add_executable(motor_controller scripts/motor_controller.cpp)
+target_link_libraries(motor_controller
+   ${catkin_LIBRARIES}
+)
