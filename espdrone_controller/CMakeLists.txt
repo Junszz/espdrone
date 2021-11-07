@@ -11,9 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs 
   nav_msgs 
   espdrone_msgs 
-  std_srvs 
-  hardware_interface 
-  controller_interface
+  std_srvs
+  tf2 
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -25,7 +24,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES espdrone_controller
-    CATKIN_DEPENDS roscpp geometry_msgs sensor_msgs nav_msgs espdrone_msgs std_srvs hardware_interface controller_interface
+    CATKIN_DEPENDS roscpp geometry_msgs sensor_msgs nav_msgs espdrone_msgs std_srvs tf2
     DEPENDS
 )
 
@@ -33,16 +32,23 @@ catkin_package(
 ## Build ##
 ###########
 
-add_library(espdrone_pose_controller src/espdrone_controller.cpp)
-target_link_libraries(espdrone_pose_controller espdrone_controller)
+add_executable(motor_controller scripts/motor_controller.cpp)
+target_link_libraries(motor_controller
+   ${catkin_LIBRARIES}
+)
+
+add_executable(twist_controller src/twist_controller.cpp)
+target_link_libraries(twist_controller
+   ${catkin_LIBRARIES}
+)
+add_dependencies(twist_controller ${catkin_EXPORTED_TARGETS})
+  
 
 #############
 ## Install ##
 #############
 
-install(TARGETS espdrone_controller espdrone_pose_controller espdrone_twist_controller espdrone_motor_controller
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+install(TARGETS twist_controller motor_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -63,8 +69,3 @@ foreach(dir config launch params meshes urdf)
 	install(DIRECTORY ${dir}/
 		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
 endforeach(dir)
-
-add_executable(motor_controller scripts/motor_controller.cpp)
-target_link_libraries(motor_controller
-   ${catkin_LIBRARIES}
-)
