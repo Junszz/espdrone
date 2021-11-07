@@ -9,7 +9,6 @@
 #include <ros/subscriber.h>
 #include <ros/callback_queue.h>
 
-
 class MotorController
 {
 private:
