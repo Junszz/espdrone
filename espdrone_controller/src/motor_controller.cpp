@@ -37,6 +37,15 @@ private:
   std_msgs::Float64 vel1,vel2,vel3,vel4;
   geometry_msgs::Wrench tmp_wrench;
 
+
+// M1          M2
+// O           O
+
+
+// M4          M3
+// O           O
+
+
 public:
   MotorController(): nh("~")
   {

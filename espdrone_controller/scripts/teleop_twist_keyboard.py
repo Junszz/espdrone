@@ -166,7 +166,7 @@ if __name__=="__main__":
     pub2 = rospy.Publisher('drone/takeoff', Empty, queue_size = 1)
     pub3 = rospy.Publisher('drone/land', Empty, queue_size = 1)
     empty_msg = Empty()
-    speed = rospy.get_param("~speed", 0.5)
+    speed = rospy.get_param("~speed", 0.2)
     turn = rospy.get_param("~turn", 1.0)
     repeat = rospy.get_param("~repeat_rate", 0.0)
     key_timeout = rospy.get_param("~key_timeout", 0.0)
@@ -224,7 +224,7 @@ if __name__=="__main__":
             twist.linear.x = x*speed; twist.linear.y = y*speed; twist.linear.z = z*speed; 
             twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
             pub.publish(twist)
-            #pub_thread.update(x, y, z, th, speed, turn)
+            pub_thread.update(x, y, z, th, speed, turn)
 
     except Exception as e:
         print(e)

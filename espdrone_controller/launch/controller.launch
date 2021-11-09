@@ -21,4 +21,4 @@
     <remap from="/cmd_vel" to="/drone$(arg drone_index)/cmd_vel" />
   </node>
 
-</launch
+</launch>
