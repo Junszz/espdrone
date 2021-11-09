@@ -1,6 +1,6 @@
 <launch>
-  <arg name="base_link" default="base_link"/>
   <arg name="lever" default="0.05"/>
+  <arg name="drone_index" default="1"/>
 
   <!-- load pids_values and others-->
   <rosparam file="$(find espdrone_controller)/params/controller.yaml" />
@@ -10,9 +10,12 @@
 
   <node name="motor_controller" pkg="espdrone_controller" type="motor_controller" output="screen">
     <param name="lever" value="$(arg lever)"/>
-    <param name="base_link_frame" value="$(arg base_link)"/>
+    <param name="base_link_frame" value="base_link_$(arg drone_index)"/>
   </node>
 
-  <node name="drone_teleop" pkg="espdrone_controller" type="teleop_twist_keyboard.py" output="screen"/>
+  <node name="drone_teleop" pkg="espdrone_controller" type="teleop_twist_keyboard.py" output="screen">
+    <param name="drone_index" value="$(arg lever)"/>
+    <remap from="/cmd_vel" to="/drone$(arg drone_index)/cmd_vel" />
+  </node>
 
 </launch>
