@@ -36,7 +36,7 @@ add_library(espdrone_controller src/pid.cpp)
 target_link_libraries(espdrone_controller ${catkin_LIBRARIES})
 add_dependencies(espdrone_controller ${catkin_EXPORTED_TARGETS})
 
-add_executable(motor_controller scripts/motor_controller.cpp)
+add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller
    ${catkin_LIBRARIES}
 )

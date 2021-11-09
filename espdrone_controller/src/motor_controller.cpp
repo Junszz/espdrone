@@ -23,6 +23,7 @@ private:
 
   geometry_msgs::WrenchStamped wrench_;
   std::string base_link_frame_;
+  std::string drone_index;
   double lever;
 
 
