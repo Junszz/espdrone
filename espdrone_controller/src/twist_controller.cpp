@@ -57,6 +57,8 @@ private:
   bool motors_running_;
   double linear_z_control_error_;
 
+  std::string drone_index;
+
 public:
   TwistController(): nh("~")
   { 

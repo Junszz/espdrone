@@ -6,6 +6,8 @@
   <rosparam file="$(find espdrone_controller)/params/controller.yaml" />
 
   <node name="twist_controller" pkg="espdrone_controller" type="twist_controller" output="screen">
+      <param name="drone_index" value="$(arg lever)"/>
+      <param name="base_link_frame" value="base_link_$(arg drone_index)"/>
   </node>
 
   <node name="motor_controller" pkg="espdrone_controller" type="motor_controller" output="screen">
