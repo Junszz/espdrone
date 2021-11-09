@@ -30,8 +30,8 @@ private:
   ros::ServiceServer shutdown_service_server_;
 
   geometry_msgs::TwistStamped command_;
-  geometry_msgs::Twist twist_;
   geometry_msgs::WrenchStamped wrench_;
+  geometry_msgs::TwistStamped twist_;
   espdrone_msgs::MotorCommand motor_;
   sensor_msgs::Imu pose_;
   sensor_msgs::Imu acceleration_;
@@ -52,6 +52,7 @@ private:
   double load_factor_limit;
   double mass_;
   double inertia_[3];
+  // double period = 0.01;
 
   bool motors_running_;
   double linear_z_control_error_;
@@ -60,23 +61,26 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
+    const ros::Duration period;
     stabilized = false;
     mass_ = 0.026; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;    // inertia in the form of ixx, iyy, izz
+    nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
+    nh.param<std::string>("drone_index", drone_index,"1");
 
     // subscribe to pose, twist and cmd_vel
-    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("imu", 1, &TwistController::poseCommandCallback, this);
-    twist_subscriber_ = nh.subscribe("command/twist", 100, &TwistController::twistCommandCallback, this);
-    cmd_vel_subscriber_ = nh.subscribe("cmd_vel", 100, &TwistController::cmd_velCommandCallback, this);
+    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
+    twist_subscriber_ = nh.subscribe("command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
+    cmd_vel_subscriber_ = nh.subscribe("drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
     
     // engage/shutdown service servers
     // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
     // shutdown_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", &TwistController::shutdownCallback, this);
     
     // wrench publisher
-    wrench_pub = nh.advertise<geometry_msgs::Wrench>("wrench", 1);
+    wrench_pub = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench", 1);
 
     // initialize PID controllers
     pid_.linear.x.init(ros::NodeHandle(nh, "linear/xy"));
@@ -98,7 +102,8 @@ public:
 
     // Get current state and command
     geometry_msgs::Twist command = command_.twist;
-    geometry_msgs::Twist twist = twist_;
+    geometry_msgs::TwistStamped twiststamped = twist_;
+    geometry_msgs::Twist twist = twist_.twist;
     geometry_msgs::Twist twist_body;
     twist_body.linear =  toBody(twist.linear);
     twist_body.angular = toBody(twist.angular);
@@ -232,7 +237,7 @@ public:
       stabilized = false;
 
     // // start controller if it not running
-    if (!isRunning()) this->startRequest(command_.header.stamp);
+    // if (!isRunning()) this->startRequest(command_.header.stamp);
   }
   
 /*******************************************************************************
@@ -245,7 +250,7 @@ public:
     stabilized = true;
 
     // // start controller if it not running
-     if (!isRunning()) this->startRequest(command_.header.stamp);
+    //  if (!isRunning()) this->startRequest(command_.header.stamp);
   }
   
 /*******************************************************************************
@@ -326,9 +331,9 @@ public:
   }
 };
 
-  int main(int argc, char ** argv)
-  {
-    ros::init(argc, argv, "twist_controller");
-    TwistController node;
-    ros::spin();
-  }
+int main(int argc, char ** argv)
+{
+  ros::init(argc, argv, "twist_controller");
+  TwistController node;
+  ros::spin();
+}
