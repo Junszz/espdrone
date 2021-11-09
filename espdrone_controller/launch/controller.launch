@@ -10,6 +10,7 @@
 
   <node name="motor_controller" pkg="espdrone_controller" type="motor_controller" output="screen">
     <param name="lever" value="$(arg lever)"/>
+    <param name="drone_index" value="$(arg lever)"/>
     <param name="base_link_frame" value="base_link_$(arg drone_index)"/>
   </node>
 
@@ -18,4 +19,4 @@
     <remap from="/cmd_vel" to="/drone$(arg drone_index)/cmd_vel" />
   </node>
 
-</launch>
+</launch

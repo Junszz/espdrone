@@ -31,13 +31,14 @@ public:
   {
     nh.param<double>("lever",lever,0.05);
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
+    nh.param<std::string>("drone_index", drone_index,"1");
 
-    wrench_pub1 = nh.advertise<geometry_msgs::Wrench>("wrench1", 1);
-    wrench_pub2 = nh.advertise<geometry_msgs::Wrench>("wrench2", 1);
-    wrench_pub3 = nh.advertise<geometry_msgs::Wrench>("wrench3", 1);
-    wrench_pub4 = nh.advertise<geometry_msgs::Wrench>("wrench4", 1);
+    wrench_pub1 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench1", 1);
+    wrench_pub2 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench2", 1);
+    wrench_pub3 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench3", 1);
+    wrench_pub4 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench4", 1);
 
-    drone_wrench_sub = nh.subscribe<geometry_msgs::WrenchStamped>("wrench", 1, &MotorController::wrenchCommandCallback, this);
+    drone_wrench_sub = nh.subscribe<geometry_msgs::WrenchStamped>("drone" + drone_index + "/wrench", 1, &MotorController::wrenchCommandCallback, this);
     ROS_INFO("Motor_controller loaded....");
   }
 
