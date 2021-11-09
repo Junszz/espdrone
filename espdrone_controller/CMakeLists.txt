@@ -41,7 +41,7 @@ target_link_libraries(motor_controller
    ${catkin_LIBRARIES}
 )
 
-add_executable(twist_controller src/twist_controller.cpp)
+add_executable(twist_controller src/twist_controller.cpp src/pid.cpp)
 target_link_libraries(twist_controller
    ${catkin_LIBRARIES}
 )
