@@ -111,6 +111,24 @@
 			</plugin>
 		</gazebo> -->
 
+		<gazebo>
+			<plugin name="drag_$(arg drone_index)" filename="libLiftDragPlugin.so">
+				<a0>0.1</a0>
+				<cla>5.418</cla>
+				<cda>0.01</cda>
+				<cma>0.0</cma>
+				<alpha_stall>0.3368</alpha_stall>
+				<cla_stall>-0.2</cla_stall>
+				<cda_stall>1.0</cda_stall>
+				<cp>0 0 0</cp>
+				<area>2e-3</area>
+				<air_density>1.2041</air_density>
+				<forward>1 0 0</forward>
+				<upward>0 0 1</upward>
+				<link_name>base_link_$(arg drone_index)</link_name>
+			</plugin>
+		</gazebo>
+	  
 			<!-- Uptrust force plugin for propellers -->
 		<gazebo>
 			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
