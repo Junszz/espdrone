@@ -44,15 +44,15 @@ public:
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
     nh.param<std::string>("drone_index", drone_index,"1");
 
-    wrench_pub1 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench1", 1);
-    wrench_pub2 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench2", 1);
-    wrench_pub3 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench3", 1);
-    wrench_pub4 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench4", 1);
+    wrench_pub1 = nh.advertise<geometry_msgs::Wrench>("/drone" + drone_index + "/FL_link_" + drone_index + "/wrench", 1);
+    wrench_pub2 = nh.advertise<geometry_msgs::Wrench>("/drone" + drone_index + "/FR_link_" + drone_index + "/wrench", 1);
+    wrench_pub3 = nh.advertise<geometry_msgs::Wrench>("/drone" + drone_index + "/BR_link_" + drone_index + "/wrench", 1);
+    wrench_pub4 = nh.advertise<geometry_msgs::Wrench>("/drone" + drone_index + "/BL_link_" + drone_index + "/wrench", 1);
 
     vel_pub1 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointFL_velocity_controller/command", 1);
     vel_pub2 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointFR_velocity_controller/command", 1);
-    vel_pub3 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBL_velocity_controller/command", 1);
-    vel_pub4 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBR_velocity_controller/command", 1);
+    vel_pub3 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBR_velocity_controller/command", 1);
+    vel_pub4 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBL_velocity_controller/command", 1);
 
     drone_wrench_sub = nh.subscribe<geometry_msgs::WrenchStamped>("drone" + drone_index + "/wrench", 1, &MotorController::wrenchCommandCallback, this);
     ROS_INFO("Motor_controller loaded....");
@@ -64,17 +64,26 @@ public:
     if (wrench_.wrench.force.z > 0.0) {
       double nominal_thrust_per_motor = wrench_.wrench.force.z / 4.0;
 
-      force1 =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 2.0 / lever;
+      force1 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
       vel1.data = sqrt(force1/coefficient);
-
-      force2 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 2.0 / lever;
+      force2 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
       vel2.data = sqrt(force2/coefficient);
-
-      force3 =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 2.0 / lever;
+      force3 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
       vel3.data = sqrt(force3/coefficient);
-
-      force4 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 2.0 / lever;
+      force4 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
       vel4.data = sqrt(force4/coefficient);
+
+      // force1 =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 2.0 / lever;
+      // vel1.data = sqrt(force1/coefficient);
+
+      // force2 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 2.0 / lever;
+      // vel2.data = sqrt(force1/coefficient);
+
+      // force3 =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 2.0 / lever;
+      // vel3.data = sqrt(force3/coefficient);
+
+      // force4 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 2.0 / lever;
+      // vel4.data = sqrt(force4/coefficient);
 
       tmp_wrench.force.z = force1;
       wrench_pub1.publish(tmp_wrench);
