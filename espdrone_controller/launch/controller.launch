@@ -1,5 +1,5 @@
 <launch>
-  <arg name="lever" default="0.05"/>
+  <arg name="lever" default="0.03238"/>
   <arg name="drone_index" default="1"/>
 
   <!-- load pids_values and others-->
