@@ -73,16 +73,16 @@ public:
     nh.param<std::string>("drone_index", drone_index,"1");
 
     // subscribe to pose, twist and cmd_vel
-    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
-    twist_subscriber_ = nh.subscribe("command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
-    cmd_vel_subscriber_ = nh.subscribe("drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
+    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
+    twist_subscriber_ = nh.subscribe("/command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
+    cmd_vel_subscriber_ = nh.subscribe("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
     
     // engage/shutdown service servers
     // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
     // shutdown_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", &TwistController::shutdownCallback, this);
     
     // wrench publisher
-    wrench_pub = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench", 1);
+    wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/drone" + drone_index + "/wrench", 1);
 
     // initialize PID controllers
     pid_.linear.x.init(ros::NodeHandle(nh, "linear/xy"));
@@ -99,8 +99,6 @@ public:
     nh.getParam("limits/torque/xy", limits_.torque.x);
     nh.getParam("limits/torque/xy", limits_.torque.y);
     nh.getParam("limits/torque/z", limits_.torque.z);
-    
-    nh.param<std::string>("base_link_frame", base_link_frame_, "base_link");
 
     // Get current state and command
     geometry_msgs::Twist command = command_.twist;
@@ -204,6 +202,7 @@ public:
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
 
       wrench_pub.publish(wrench_);
+      ROS_INFO("Twist_controller loaded....");
     } 
 
     else {reset();}
