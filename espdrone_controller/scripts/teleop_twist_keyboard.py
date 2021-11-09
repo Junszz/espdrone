@@ -166,7 +166,7 @@ if __name__=="__main__":
     pub2 = rospy.Publisher('drone/takeoff', Empty, queue_size = 1)
     pub3 = rospy.Publisher('drone/land', Empty, queue_size = 1)
     empty_msg = Empty()
-    speed = rospy.get_param("~speed", 0.)
+    speed = rospy.get_param("~speed", 0.5)
     turn = rospy.get_param("~turn", 1.0)
     repeat = rospy.get_param("~repeat_rate", 0.0)
     key_timeout = rospy.get_param("~key_timeout", 0.0)
@@ -194,6 +194,7 @@ if __name__=="__main__":
                 y = moveBindings[key][1]
                 z = moveBindings[key][2]
                 th = moveBindings[key][3]
+                print(f"x:{x}, y:{y}, z:{z}, th:{th}")
             elif key in speedBindings.keys():
                 speed = speed * speedBindings[key][0]
                 turn = turn * speedBindings[key][1]
@@ -213,6 +214,7 @@ if __name__=="__main__":
                 # stopped.
                 if key == '' and x == 0 and y == 0 and z == 0 and th == 0:
                     continue
+                print("stop")
                 x = 0
                 y = 0
                 z = 0
@@ -224,7 +226,7 @@ if __name__=="__main__":
             twist.linear.x = x*speed; twist.linear.y = y*speed; twist.linear.z = z*speed; 
             twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
             pub.publish(twist)
-            #pub_thread.update(x, y, z, th, speed, turn)
+            pub_thread.update(x, y, z, th, speed, turn)
 
     except Exception as e:
         print(e)

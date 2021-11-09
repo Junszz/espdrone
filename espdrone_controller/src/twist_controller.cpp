@@ -74,8 +74,8 @@ public:
 
     // subscribe to pose, twist and cmd_vel
     pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
-    twist_subscriber_ = nh.subscribe("/command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
-    cmd_vel_subscriber_ = nh.subscribe("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
+    twist_subscriber_ = nh.subscribe<geometry_msgs::TwistStamped>("/command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
+    cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
     
     // engage/shutdown service servers
     // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
