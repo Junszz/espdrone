@@ -11,6 +11,8 @@
 #include <ros/subscriber.h>
 #include <ros/callback_queue.h>
 
+#include <espdrone_controller/pid.h>
+
 #include <limits>
 
 class TwistController 
@@ -22,10 +24,7 @@ private:
   ros::Subscriber twist_subscriber_;
   ros::Subscriber cmd_vel_subscriber_;
   // publisher <link>/wrench
-  ros::Publisher motor_pub1;
-  ros::Publisher motor_pub2;
-  ros::Publisher motor_pub3;
-  ros::Publisher motor_pub4;
+  ros::Publisher wrench_pub;
   // services
   ros::ServiceServer engage_service_server_;
   ros::ServiceServer shutdown_service_server_;
@@ -42,9 +41,9 @@ private:
 
   struct {
     struct {
-      PID x;
-      PID y;
-      PID z;
+      espdrone_controller::PID x;
+      espdrone_controller::PID y;
+      espdrone_controller::PID z;
     } linear, angular;
   } pid_;
 
@@ -53,8 +52,6 @@ private:
   double load_factor_limit;
   double mass_;
   double inertia_[3];
-  double goal_linear_velocity_;
-  double goal_angular_velocity_;
 
   bool motors_running_;
   double linear_z_control_error_;
@@ -63,8 +60,6 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    goal_linear_velocity_ = 0.0;
-    goal_angular_velocity_ = 0.0;
     stabilized = false;
     mass_ = 0.026; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
@@ -80,11 +75,8 @@ public:
     // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
     // shutdown_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", &TwistController::shutdownCallback, this);
     
-    // motor power publisher
-    motor_pub1 = nh.advertise<geometry_msgs::Wrench>("m1", 1);
-    motor_pub2 = nh.advertise<geometry_msgs::Wrench>("m2", 1);
-    motor_pub3 = nh.advertise<geometry_msgs::Wrench>("m3", 1);
-    motor_pub4 = nh.advertise<geometry_msgs::Wrench>("m4", 1);
+    // wrench publisher
+    wrench_pub = nh.advertise<geometry_msgs::Wrench>("wrench", 1);
 
     // initialize PID controllers
     pid_.linear.x.init(ros::NodeHandle(nh, "linear/xy"));
@@ -204,37 +196,7 @@ public:
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
 
-      // compute motor output 
-      double nominal_thrust_per_motor = wrench_.wrench.force.z / 4.0;
-      // 3 propellers so divided by 3, torque = F x l
-      // set the wrench to this format /drone_$(arg drone_index)/BL_link_2/wrench
-      motor_.force[0] =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 3.0 / parameters_.lever;
-      motor_.force[1] =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 3.0 / parameters_.lever;
-      motor_.force[2] =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 3.0 / parameters_.lever;
-      motor_.force[3] =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 3.0 / parameters_.lever;
-
-      // convert force to rpm, then pub to joint_state_controller
-
-      // double nominal_torque_per_motor = wrench_.wrench.torque.z / 4.0;
-      // motor_.voltage[0] = motor_.force[0] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
-      // motor_.voltage[1] = motor_.force[1] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
-      // motor_.voltage[2] = motor_.force[2] / parameters_.force_per_voltage + nominal_torque_per_motor / parameters_.torque_per_voltage;
-      // motor_.voltage[3] = motor_.force[3] / parameters_.force_per_voltage - nominal_torque_per_motor / parameters_.torque_per_voltage;
-
-      // motor_.torque[0] = motor_.voltage[0] * parameters_.torque_per_voltage;
-      // motor_.torque[1] = motor_.voltage[1] * parameters_.torque_per_voltage;
-      // motor_.torque[2] = motor_.voltage[2] * parameters_.torque_per_voltage;
-      // motor_.torque[3] = motor_.voltage[3] * parameters_.torque_per_voltage;
-
-      if (motor_.voltage[0] < 0.0) motor_.voltage[0] = 0.0;
-      if (motor_.voltage[1] < 0.0) motor_.voltage[1] = 0.0;
-      if (motor_.voltage[2] < 0.0) motor_.voltage[2] = 0.0;
-      if (motor_.voltage[3] < 0.0) motor_.voltage[3] = 0.0;
-
-      motor_pub1.publish(motor_.voltage[0]);
-      motor_pub2.publish(motor_.voltage[1]);
-      motor_pub3.publish(motor_.voltage[2]);
-      motor_pub4.publish(motor_.voltage[3]);
+      wrench_pub.publish(wrench_);
     } 
 
     else {reset();}
@@ -362,6 +324,7 @@ public:
     body.z = (2.*q[0]*q[2] + 2.*q[3]*q[1]) * nav.x + (2.*q[1]*q[2] - 2.*q[3]*q[0]) * nav.y + (q[3]*q[3]-q[0]*q[0]-q[1]*q[1]+q[2]*q[2]) * nav.z;
     return body;
   }
+};
 
   int main(int argc, char ** argv)
   {
@@ -369,5 +332,3 @@ public:
     TwistController node;
     ros::spin();
   }
-
-}

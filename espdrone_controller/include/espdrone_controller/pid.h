@@ -1,9 +1,9 @@
-#ifndef ESPDRONE_CONTROLLER_PID_H
-#define ESPDRONE_CONTROLLER_PID_H
+#ifndef ESPDRONE_PID_H
+#define ESPDRONE_PID_H
 
 #include <ros/node_handle.h>
 
-namespace espdrone_controller {
+namespace espdrone_controller{
 
 class PID
 {
@@ -18,23 +18,7 @@ public:
     double limit_i;
     double limit_output;
   } parameters_;
-    pose:
-        type: espdrone_controller/PoseController
-        xy:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 5.0
-        z:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 5.0
-        yaw:
-            k_p: 2.0
-            k_i: 0.0
-            k_d: 0.0
-            limit_output: 1.0
+
   struct state {
     state();
     double p, i, d;
@@ -55,7 +39,6 @@ public:
 
   double getFilteredControlError(double& filtered_error, double time_constant, const ros::Duration& dt);
 };
+}
 
-} // namespace espdrone_controller
-
-#endif // ESPDRONE_CONTROLLER_PID_H
+#endif // ESPDRONE_PID_H

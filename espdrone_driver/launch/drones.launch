@@ -22,7 +22,7 @@
   </group>
 
   <!-- BEGIN ROBOT 2-->
-  <group ns="drone2">
+  <!-- <group ns="drone2">
     <include file="$(find espdrone_driver)/launch/one_drone.launch" >
       <arg name="x" value="-1.0" />
 	    <arg name="y" value="0.0" />
@@ -30,7 +30,7 @@
 	    <arg name="Y" value="0.0" />
       <arg name="drone_index"  value="2" />
     </include>
-  </group>
+  </group> -->
 
   <!-- BEGIN ROBOT 3-->
   <!--group ns="drone3">
