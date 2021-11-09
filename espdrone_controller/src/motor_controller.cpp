@@ -49,10 +49,10 @@ public:
     wrench_pub3 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench3", 1);
     wrench_pub4 = nh.advertise<geometry_msgs::Wrench>("drone" + drone_index + "/wrench4", 1);
 
-    vel_pub1 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/joint1_velocity_controller/command", 1);
-    vel_pub2 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/joint2_velocity_controller/command", 1);
-    vel_pub3 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/joint3_velocity_controller/command", 1);
-    vel_pub4 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/joint4_velocity_controller/command", 1);
+    vel_pub1 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointFL_velocity_controller/command", 1);
+    vel_pub2 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointFR_velocity_controller/command", 1);
+    vel_pub3 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBL_velocity_controller/command", 1);
+    vel_pub4 = nh.advertise<std_msgs::Float64>("drone" + drone_index + "/jointBR_velocity_controller/command", 1);
 
     drone_wrench_sub = nh.subscribe<geometry_msgs::WrenchStamped>("drone" + drone_index + "/wrench", 1, &MotorController::wrenchCommandCallback, this);
     ROS_INFO("Motor_controller loaded....");
