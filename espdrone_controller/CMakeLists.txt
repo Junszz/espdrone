@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.0.2)
 project(espdrone_controller)
 
 ## Find catkin macros and libraries
@@ -9,7 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp 
   geometry_msgs 
   sensor_msgs 
-  nav_msgs 
+  nav_msgs
+  gazebo_msgs 
   espdrone_msgs 
   std_srvs
   tf2 
@@ -24,7 +25,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES espdrone_controller
-    CATKIN_DEPENDS roscpp geometry_msgs sensor_msgs nav_msgs espdrone_msgs std_srvs tf2
+    CATKIN_DEPENDS roscpp geometry_msgs sensor_msgs nav_msgs espdrone_msgs gazebo_msgs std_srvs tf2
     DEPENDS
 )
 

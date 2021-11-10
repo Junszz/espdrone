@@ -3,6 +3,7 @@
 
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <gazebo_msgs/ModelStates.h>
 #include <sensor_msgs/Imu.h>
 #include <espdrone_msgs/MotorCommand.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -56,7 +57,7 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.026; // 26 grams
+    mass_ = 0.01; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
@@ -85,6 +86,8 @@ public:
     ROS_INFO_NAMED("twist_controller", "Getting params!");
 
     // subscribe to pose, twist and cmd_vel
+    twist_subscriber_ = nh.subscribe("/gazebo/model_states", 1, &TwistController::twistCommandCallback, this);
+    // ros::Subscriber model_states_subscriber = n.subscribe("/gazebo/model_states", 100, model_states_callback);
     pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
     cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
     
@@ -93,8 +96,12 @@ public:
 /*******************************************************************************
 * Callback function for twist command
 *******************************************************************************/
-  void twistControllerCallback(const geometry_msgs::TwistStampedConstPtr& twist)
-  {}
+  void twistCommandCallback(gazebo_msgs::ModelStates msg)
+  {
+    twist_.twist = msg.twist[9];
+    twist_.header.stamp = ros::Time::now();
+
+  }
   
 /*******************************************************************************
 * Callback function for cmd_vel msg
@@ -104,6 +111,24 @@ public:
     command_.twist = *vel; // from cmd_vel
     command_.header.stamp = ros::Time::now();
     stabilized = true;
+
+  }
+  
+/*******************************************************************************
+* Callback function for pose msg
+*******************************************************************************/
+  void poseCommandCallback(const sensor_msgs::Imu::ConstPtr& pose_msg)
+  {
+    pose_ = *pose_msg;
+    acceleration_ = *pose_msg; //imu msg consists of linear acc, assign from here directly
+    pose_.orientation.x = pose_msg->orientation.x;
+    pose_.orientation.y = pose_msg->orientation.y;
+    pose_.orientation.z = pose_msg->orientation.z;
+    pose_.orientation.w = pose_msg->orientation.w;
+    acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
+    acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
+    acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
+
     // geometry_msgs::TwistStamped twiststamped = twist_;
     // geometry_msgs::Twist twist = twist_.twist; //extract twist from stamped
     geometry_msgs::Twist twist = twist_.twist; //current twist
@@ -137,32 +162,32 @@ public:
     if (load_factor_limit > 0.0 && !(load_factor < load_factor_limit)) load_factor = load_factor_limit;
 
     // Auto engage/shutdown
-    if (auto_engage_) {
-      if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
-        motors_running_ = true;
-        ROS_INFO_NAMED("twist_controller", "Engaging motors!");
-      } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
-        double shutdown_limit = 0.25 * std::min(command.linear.z, -0.5);
-        if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
-        if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
-          motors_running_ = false;
-          ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
-        } else {
-          ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
-        }
-      } else {
-        linear_z_control_error_ = 0.0;
-      }
+    // if (auto_engage_) {
+    //   if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
+    //     motors_running_ = true;
+    //     ROS_INFO_NAMED("twist_controller", "Engaging motors!");
+    //   } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
+    //     double shutdown_limit = 1.0 * std::min(command.linear.z, -0.5);
+    //     if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
+    //     if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
+    //       motors_running_ = false;
+    //       ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
+    //     } else {
+    //       ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
+    //     }
+    //   } else {
+    //     linear_z_control_error_ = 0.0;
+    //   }
 
       // flip over?
-      if (motors_running_ && load_factor < 0.0) {
-        motors_running_ = false;
-        ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
-      }
-    }
+    //   if (motors_running_ && load_factor < 0.0) {
+    //     motors_running_ = false;
+    //     ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
+    //   }
+    // }
 
     // Update output
-    if (motors_running_) {
+    if (1) {
       geometry_msgs::Vector3 acceleration_command;
       acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, period);
       acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, period);
@@ -201,27 +226,10 @@ public:
 
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
-
+      
+      ROS_INFO_NAMED("twist_controller", "controller running!");
       wrench_pub.publish(wrench_);
     } 
-
-  }
-  
-/*******************************************************************************
-* Callback function for pose msg
-*******************************************************************************/
-  void poseCommandCallback(const sensor_msgs::Imu::ConstPtr& pose_msg)
-  {
-    pose_ = *pose_msg;
-    acceleration_ = *pose_msg; //imu msg consists of linear acc, assign from here directly
-    pose_.orientation.x = pose_msg->orientation.x;
-    pose_.orientation.y = pose_msg->orientation.y;
-    pose_.orientation.z = pose_msg->orientation.z;
-    pose_.orientation.w = pose_msg->orientation.w;
-    acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
-    acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
-    acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
-
     // // start controller if it not running
     // if (!isRunning()) this->startRequest(command_.header.stamp);
   }
@@ -268,7 +276,6 @@ public:
     tf2::Quaternion q;
     q[0] = pose_.orientation.x;
     q[1] = pose_.orientation.y;
-    q[2] = pose_.orientation.z;
     q[3] = pose_.orientation.w;
     geometry_msgs::Vector3 body;
     body.x = (q[3]*q[3]+q[0]*q[0]-q[1]*q[1]-q[2]*q[2]) * nav.x + (2.*q[0]*q[1] + 2.*q[3]*q[2]) * nav.y + (2.*q[0]*q[2] - 2.*q[3]*q[2]) * nav.z;

@@ -1,7 +1,7 @@
 <launch>
 	<arg name="x" default="0.0" />
 	<arg name="y" default="0.0" />
-	<arg name="z" default="0.0" />
+	<arg name="z" default="0.5" />
 	<arg name="R" default="0.0" />
 	<arg name="P" default="0.0" />
 	<arg name="Y" default="0.0" />
@@ -20,7 +20,7 @@
     args="-model drone$(arg drone_index) -urdf -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"
     output="screen" />
 
-  <!-- <include file="$(find espdrone_controller)/launch/controller.launch"/> -->
+  <include file="$(find espdrone_controller)/launch/controller.launch"/>
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" />
   

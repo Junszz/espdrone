@@ -28,6 +28,7 @@
 
 #include <espdrone_controller/pid.h>
 #include <limits>
+#include <ros/ros.h>
 
 namespace espdrone_controller {
 
@@ -64,7 +65,8 @@ PID::~PID()
 
 void PID::init(const ros::NodeHandle &param_nh)
 {
-  param_nh.getParam("enabled", parameters_.enabled);
+  param_nh.param<bool>("enabled",parameters_.enabled, true);
+  // param_nh.getParam("enabled", parameters_.enabled);
   param_nh.getParam("k_p", parameters_.k_p);
   param_nh.getParam("k_i", parameters_.k_i);
   param_nh.getParam("k_d", parameters_.k_d);
@@ -101,8 +103,8 @@ double PID::update(double input, double x, double dx, const ros::Duration& dt)
 
 double PID::update(double error, double dx, const ros::Duration& dt)
 {
-  if (!parameters_.enabled) return 0.0;
-  if (std::isnan(error)) return 0.0;
+  // if (!parameters_.enabled) return 0.0;
+  // if (std::isnan(error)) return 0.0;
   double dt_sec = dt.toSec();
 
   // integral error
