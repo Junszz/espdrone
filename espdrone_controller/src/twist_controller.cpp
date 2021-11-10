@@ -19,15 +19,10 @@ class TwistController
 {
 private:
   ros::NodeHandle nh;
-  // subscriber
   ros::Subscriber pose_subscriber_;
   ros::Subscriber twist_subscriber_;
   ros::Subscriber cmd_vel_subscriber_;
-  // publisher <link>/wrench
   ros::Publisher wrench_pub;
-  // services
-  ros::ServiceServer engage_service_server_;
-  ros::ServiceServer shutdown_service_server_;
 
   geometry_msgs::TwistStamped command_;
   geometry_msgs::WrenchStamped wrench_;
@@ -35,9 +30,7 @@ private:
   espdrone_msgs::MotorCommand motor_;
   sensor_msgs::Imu pose_;
   sensor_msgs::Imu acceleration_;
-
-  bool stabilized;
-  std::string base_link_frame_;
+  const ros::Duration period;
 
   struct {
     struct {
@@ -52,34 +45,24 @@ private:
   double load_factor_limit;
   double mass_;
   double inertia_[3];
-  // double period = 0.01;
 
-  bool motors_running_;
+  bool motors_running_ = true;
   double linear_z_control_error_;
-
-  std::string drone_index;
+  bool stabilized;
+  std::string base_link_frame_, drone_index;
+  const double gravity = 9.8065;    
 
 public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    const ros::Duration period;
-    stabilized = false;
     mass_ = 0.026; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
-    inertia_[2] = 1.04978709710599E-05;    // inertia in the form of ixx, iyy, izz
+    inertia_[2] = 1.04978709710599E-05;
+    stabilized = false;
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
     nh.param<std::string>("drone_index", drone_index,"1");
-
-    // subscribe to pose, twist and cmd_vel
-    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
-    twist_subscriber_ = nh.subscribe<geometry_msgs::TwistStamped>("/command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
-    cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
-    
-    // engage/shutdown service servers
-    // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
-    // shutdown_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", &TwistController::shutdownCallback, this);
     
     // wrench publisher
     wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/drone" + drone_index + "/wrench", 1);
@@ -99,21 +82,43 @@ public:
     nh.getParam("limits/torque/xy", limits_.torque.x);
     nh.getParam("limits/torque/xy", limits_.torque.y);
     nh.getParam("limits/torque/z", limits_.torque.z);
+    ROS_INFO_NAMED("twist_controller", "Getting params!");
 
-    // Get current state and command
-    geometry_msgs::Twist command = command_.twist;
-    geometry_msgs::TwistStamped twiststamped = twist_;
-    geometry_msgs::Twist twist = twist_.twist;
+    // subscribe to pose, twist and cmd_vel
+    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
+    cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
+    
+  }
+
+/*******************************************************************************
+* Callback function for twist command
+*******************************************************************************/
+  void twistControllerCallback(const geometry_msgs::TwistStampedConstPtr& twist)
+  {}
+  
+/*******************************************************************************
+* Callback function for cmd_vel msg
+*******************************************************************************/
+  void cmd_velCommandCallback(const geometry_msgs::TwistConstPtr& vel)
+  {
+    command_.twist = *vel; // from cmd_vel
+    command_.header.stamp = ros::Time::now();
+    stabilized = true;
+    // geometry_msgs::TwistStamped twiststamped = twist_;
+    // geometry_msgs::Twist twist = twist_.twist; //extract twist from stamped
+    geometry_msgs::Twist twist = twist_.twist; //current twist
     geometry_msgs::Twist twist_body;
-    twist_body.linear =  toBody(twist.linear);
-    twist_body.angular = toBody(twist.angular);
+    twist_body.linear =  toBody(twist_.twist.linear);
+    twist_body.angular = toBody(twist_.twist.angular);
+
+    geometry_msgs::Twist command = command_.twist;
 
     // Transform to world coordinates if necessary (yaw only)
     if (stabilized) {
       // double yaw = pose_->getYaw();
       double yaw = getYaw();
       geometry_msgs::Twist transformed;
-
+      //command is from cmd_vel
       transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
       transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
       transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
@@ -121,10 +126,6 @@ public:
 
       command = transformed;
     }
-
-    // Get gravity and load factor
-    // load factor is equal to 1 when the aircraft is static on the ground
-    const double gravity = 9.8065;
 
     // calculation of load factor
     double load_factor = 1. / (  pose_.orientation.w * pose_.orientation.w
@@ -163,12 +164,12 @@ public:
     // Update output
     if (motors_running_) {
       geometry_msgs::Vector3 acceleration_command;
-      acceleration_command.x = pid_.linear.x.update(command.linear.x, twist.linear.x, acceleration_.linear_acceleration.x, period);
-      acceleration_command.y = pid_.linear.y.update(command.linear.y, twist.linear.y, acceleration_.linear_acceleration.y, period);
-      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist.linear.z, acceleration_.linear_acceleration.z, period) + gravity;
+      acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, period);
+      acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, period);
+      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, period) + gravity;
       geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
 
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist.linear.x << " " << twist.linear.y << " " << twist.linear.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
@@ -178,7 +179,7 @@ public:
 
       wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, period);
       wrench_.wrench.torque.y = inertia_[1] * pid_.angular.y.update( acceleration_command_body.x / gravity, 0.0, twist_body.angular.y, period);
-      wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist.angular.z, 0.0, period);
+      wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist_.twist.angular.z, 0.0, period);
       wrench_.wrench.force.x  = 0.0;
       wrench_.wrench.force.y  = 0.0;
       wrench_.wrench.force.z  = mass_ * ((acceleration_command.z - gravity) * load_factor + gravity);
@@ -202,56 +203,8 @@ public:
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
 
       wrench_pub.publish(wrench_);
-      ROS_INFO("Twist_controller loaded....");
     } 
 
-    else {reset();}
-  }
-  
-  void reset()
-  {
-    pid_.linear.x.reset();
-    pid_.linear.y.reset();
-    pid_.linear.z.reset();
-    pid_.angular.x.reset();
-    pid_.angular.y.reset();
-    pid_.angular.z.reset();
-
-    wrench_.wrench.force.x  = 0.0;
-    wrench_.wrench.force.y  = 0.0;
-    wrench_.wrench.force.z  = 0.0;
-    wrench_.wrench.torque.x = 0.0;
-    wrench_.wrench.torque.y = 0.0;
-    wrench_.wrench.torque.z = 0.0;
-
-    linear_z_control_error_ = 0.0;
-    motors_running_ = false;
-  }
-
-/*******************************************************************************
-* Callback function for twistcommand
-*******************************************************************************/
-  void twistCommandCallback(const geometry_msgs::TwistStampedConstPtr& twist)
-  {
-    twist_ = *twist;
-    if (command_.header.stamp.isZero()) command_.header.stamp = ros::Time::now();
-      stabilized = false;
-
-    // // start controller if it not running
-    // if (!isRunning()) this->startRequest(command_.header.stamp);
-  }
-  
-/*******************************************************************************
-* Callback function for cmd_vel msg
-*******************************************************************************/
-  void cmd_velCommandCallback(const geometry_msgs::TwistConstPtr& command)
-  {
-    command_.twist = *command;
-    command_.header.stamp = ros::Time::now();
-    stabilized = true;
-
-    // // start controller if it not running
-    //  if (!isRunning()) this->startRequest(command_.header.stamp);
   }
   
 /*******************************************************************************
@@ -273,39 +226,36 @@ public:
     // if (!isRunning()) this->startRequest(command_.header.stamp);
   }
 
-  bool engageCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
+  void reset()
   {
-    ROS_INFO_NAMED("twist_controller", "Engaging motors!");
-    motors_running_ = true;
-    return true;
-  }
+    pid_.linear.x.reset();
+    pid_.linear.y.reset();
+    pid_.linear.z.reset();
+    pid_.angular.x.reset();
+    pid_.angular.y.reset();
+    pid_.angular.z.reset();
 
-  bool shutdownCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
-  {
-    ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
+    wrench_.wrench.force.x  = 0.0;
+    wrench_.wrench.force.y  = 0.0;
+    wrench_.wrench.force.z  = 0.0;
+    wrench_.wrench.torque.x = 0.0;
+    wrench_.wrench.torque.y = 0.0;
+    wrench_.wrench.torque.z = 0.0;
+
+    linear_z_control_error_ = 0.0;
     motors_running_ = false;
-    return true;
   }
 
   void starting(const ros::Time &time)
-  {
-    reset();
-    // wrench_output_->start();
-  }
+  {}
 
   void stopping(const ros::Time &time)
-  {
-    // wrench_output_->stop();
-  }
+  {}
 
   // find yaw from quartenion
   double getYaw() const
   {
     tf2::Quaternion q;
-    // const Quaternion::_w_type& w = pose_.orientation.w;
-    // const Quaternion::_x_type& x = pose_.orientation.x;
-    // const Quaternion::_y_type& y = pose_.orientation.y;
-    // const Quaternion::_z_type& z = pose_.orientation.z;
     q[0] = pose_.orientation.x;
     q[1] = pose_.orientation.y;
     q[2] = pose_.orientation.z;
@@ -316,10 +266,6 @@ public:
   geometry_msgs::Vector3 toBody(geometry_msgs::Vector3& nav) const
   {
     tf2::Quaternion q;
-    // const Quaternion::_w_type& w = pose_.orientation.w;
-    // const Quaternion::_x_type& x = pose_.orientation.x;
-    // const Quaternion::_y_type& y = pose_.orientation.y;
-    // const Quaternion::_z_type& z = pose_.orientation.z;
     q[0] = pose_.orientation.x;
     q[1] = pose_.orientation.y;
     q[2] = pose_.orientation.z;

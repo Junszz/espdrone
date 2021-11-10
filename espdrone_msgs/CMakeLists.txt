@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.21)
 project(espdrone_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
