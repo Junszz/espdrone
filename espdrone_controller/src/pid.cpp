@@ -73,6 +73,12 @@ void PID::init(const ros::NodeHandle &param_nh)
   param_nh.getParam("limit_i", parameters_.limit_i);
   param_nh.getParam("limit_output", parameters_.limit_output);
   param_nh.getParam("time_constant", parameters_.time_constant);
+  parameters_.k_p = 0.5;
+  parameters_.k_i = 0.1;
+  parameters_.k_d = 0.0;
+  parameters_.limit_i = 0.01;
+  parameters_.limit_output = 1.0;
+  parameters_.time_constant = 0.01;
 }
 
 void PID::reset()
@@ -86,27 +92,26 @@ template <typename T> static inline T& checknan(T& value)
   return value;
 }
 
-double PID::update(double input, double x, double dx, const ros::Duration& dt)
+double PID::update(double input, double x, double dx, double dt)
 {
   if (!parameters_.enabled) return 0.0;
-  double dt_sec = dt.toSec();
-
+  double dt_sec = dt;
+  // ROS_INFO("command: %f, x: %f, dx: %f, dt: %f", input,x,dx,dt); 
   // low-pass filter input
   if (std::isnan(state_.input)) state_.input = input;
   if (dt_sec + parameters_.time_constant > 0.0) {
     state_.dinput = (input - state_.input) / (dt_sec + parameters_.time_constant);
     state_.input  = (dt_sec * input + parameters_.time_constant * state_.input) / (dt_sec + parameters_.time_constant);
   }
-
   return update(state_.input - x, dx, dt);
 }
 
-double PID::update(double error, double dx, const ros::Duration& dt)
+double PID::update(double error, double dx, double dt)
 {
   // if (!parameters_.enabled) return 0.0;
   // if (std::isnan(error)) return 0.0;
-  double dt_sec = dt.toSec();
-
+  // ROS_INFO("error: %f, dx: %f, dt: %f",error,dx,dt); 
+  double dt_sec = dt;
   // integral error
   state_.i += error * dt_sec;
   if (parameters_.limit_i > 0.0)
@@ -126,6 +131,7 @@ double PID::update(double error, double dx, const ros::Duration& dt)
   // proportional error
   state_.p = error;
 
+  ROS_INFO("parameters_p: %f, parameters_i: %f, parameters_d: %f",parameters_.k_p,parameters_.k_i,parameters_.k_d); 
   // calculate output...
   double output = parameters_.k_p * state_.p + parameters_.k_i * state_.i + parameters_.k_d * state_.d;
   int antiwindup = 0;
@@ -135,8 +141,8 @@ double PID::update(double error, double dx, const ros::Duration& dt)
     if (output < -parameters_.limit_output) { output = -parameters_.limit_output; antiwindup = -1; }
   }
   if (antiwindup && (error * dt_sec * antiwindup > 0.0)) state_.i -= error * dt_sec;
-
   checknan(output);
+  ROS_INFO("output: %f", output); 
   return output;
 }
 
