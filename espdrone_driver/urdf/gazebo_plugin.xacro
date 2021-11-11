@@ -222,13 +222,6 @@
 	<gazebo reference="FL_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
     </gazebo>
-	<!-- <gazebo>
-		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
-		<updateRate>10.0</updateRate>
-		<topicName>BR_joint_sensor</topicName>
-		<jointName>BR_joint_$(arg drone_index)</jointName>
-		</plugin>
-  	</gazebo> -->
 
 	<gazebo>
 		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">

@@ -1,29 +1,31 @@
-TwistController:
-    linear/xy:
-        k_p: 0.5
-        k_i: 0.1
-        k_d: 0.0
-        limit_output: 1.0
-        time_constant: 0.05
-    linear/z:
-        k_p: 0.5
-        k_i: 0.1
-        k_d: 0.0
-        limit_output: 1.0
-        time_constant: 0.05
-    angular/xy:
-        k_p: 1.0
-        k_i: 0.5
-        k_d: 0.5
-        time_constant: 0.01
-    angular/z:
-        k_p: 0.5
-        k_i: 0.25
-        k_d: 0.0
-        limit_output: 0.3
-        time_constant: 0.1
-    limits:
-        load_factor: 1.5
-        force/z: 0.3
-        torque/xy: 0.1
-        torque/z: 0.01
+controller:
+    twist:
+        type: TwistController
+        linear/xy:
+            k_p: 0.05
+            k_i: 0.01
+            k_d: 0.0
+            limit_output: 0.1
+            time_constant: 0.05
+        linear/z:
+            k_p: 0.05
+            k_i: 0.01
+            k_d: 0.0
+            limit_output: 0.1
+            time_constant: 0.05
+        angular/xy:
+            k_p: 0.1
+            k_i: 0.05
+            k_d: 0.05
+            time_constant: 0.01
+        angular/z:
+            k_p: 0.05
+            k_i: 0.025
+            k_d: 0.0
+            limit_output: 0.03
+            time_constant: 0.1
+        limits:
+            load_factor: 1.5
+            force/z: 0.3
+            torque/xy: 0.1
+            torque/z: 0.01
