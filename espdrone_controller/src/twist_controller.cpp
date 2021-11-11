@@ -57,7 +57,7 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.01; // 26 grams
+    mass_ = 0.026; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
@@ -227,7 +227,7 @@ public:
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
       
-      ROS_INFO_NAMED("twist_controller", "controller running!");
+      // ROS_INFO_NAMED("twist_controller", "controller running!");
       wrench_pub.publish(wrench_);
     } 
     // // start controller if it not running
