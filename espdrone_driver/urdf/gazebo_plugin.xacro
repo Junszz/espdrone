@@ -129,6 +129,7 @@
 			</plugin>
 		</gazebo>
 	  
+	  
 			<!-- Uptrust force plugin for propellers
 		<gazebo>
 			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
@@ -222,6 +223,13 @@
 	<gazebo reference="FL_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
     </gazebo>
+
+	<gazebo>
+		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
+		<robotNamespace>drone$(arg drone_index)</robotNamespace>
+		<linkName>base_link_$(arg drone_index)</linkName>
+		</plugin>
+  	</gazebo>
 
 	<gazebo>
 		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">

@@ -60,7 +60,7 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.024; // 26 grams
+    mass_ = 0.025; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
@@ -139,8 +139,8 @@ public:
     twist_body.linear =  toBody(twist_.twist.linear);
     twist_body.angular = toBody(twist_.twist.angular);
 
-    geometry_msgs::Twist command = command_.twist;
-
+    geometry_msgs::Twist command = this -> command_.twist;
+    // ROS_INFO("command_z_inpose: %f", command.linear.z); 
     // Transform to world coordinates if necessary (yaw only)
     if (stabilized) {
       // double yaw = pose_->getYaw();
@@ -200,7 +200,6 @@ public:
       acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, time_interval);
       acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, time_interval) + gravity;
       geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
-
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");

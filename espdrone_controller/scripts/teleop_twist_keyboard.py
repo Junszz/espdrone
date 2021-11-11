@@ -185,8 +185,8 @@ if __name__=="__main__":
         pub_thread.wait_for_subscribers()
         pub_thread.update(x, y, z, th, speed, turn)
 
-        #print(msg)
-        #print(vels(speed,turn))
+        print(msg)
+        print(vels(speed,turn))
         while(1):
             key = getKey(key_timeout)
             if key in moveBindings.keys():

@@ -73,12 +73,12 @@ void PID::init(const ros::NodeHandle &param_nh)
   param_nh.getParam("limit_i", parameters_.limit_i);
   param_nh.getParam("limit_output", parameters_.limit_output);
   param_nh.getParam("time_constant", parameters_.time_constant);
-  parameters_.k_p = 0.5;
-  parameters_.k_i = 0.1;
-  parameters_.k_d = 0.0;
-  parameters_.limit_i = 0.01;
-  parameters_.limit_output = 1.0;
-  parameters_.time_constant = 0.01;
+  // parameters_.k_p = 5.0;
+  // parameters_.k_i = 1.0;
+  // parameters_.k_d = 0.0;
+  // parameters_.limit_i = 1.0;
+  // parameters_.limit_output = 1.0;
+  // parameters_.time_constant = 0.01;
 }
 
 void PID::reset()
@@ -110,7 +110,6 @@ double PID::update(double error, double dx, double dt)
 {
   // if (!parameters_.enabled) return 0.0;
   // if (std::isnan(error)) return 0.0;
-  // ROS_INFO("error: %f, dx: %f, dt: %f",error,dx,dt); 
   double dt_sec = dt;
   // integral error
   state_.i += error * dt_sec;
@@ -131,7 +130,7 @@ double PID::update(double error, double dx, double dt)
   // proportional error
   state_.p = error;
 
-  ROS_INFO("parameters_p: %f, parameters_i: %f, parameters_d: %f",parameters_.k_p,parameters_.k_i,parameters_.k_d); 
+  // ROS_INFO("parameters_p: %f, parameters_i: %f, parameters_d: %f",parameters_.k_p,parameters_.k_i,parameters_.k_d); 
   // calculate output...
   double output = parameters_.k_p * state_.p + parameters_.k_i * state_.i + parameters_.k_d * state_.d;
   int antiwindup = 0;
@@ -142,7 +141,7 @@ double PID::update(double error, double dx, double dt)
   }
   if (antiwindup && (error * dt_sec * antiwindup > 0.0)) state_.i -= error * dt_sec;
   checknan(output);
-  ROS_INFO("output: %f", output); 
+  // ROS_INFO("kp: %f, error: %f, dx: %f, dt: %f, output: %f", parameters_.k_p, error,dx,dt,output); 
   return output;
 }
 
