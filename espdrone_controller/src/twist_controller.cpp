@@ -5,6 +5,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <gazebo_msgs/ModelStates.h>
 #include <sensor_msgs/Imu.h>
+#include <std_msgs/Empty.h>
 #include <espdrone_msgs/MotorCommand.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <std_srvs/Empty.h>
@@ -23,6 +24,8 @@ private:
   ros::Subscriber pose_subscriber_;
   ros::Subscriber twist_subscriber_;
   ros::Subscriber cmd_vel_subscriber_;
+  ros::Subscriber takeoff_subscriber_;
+  ros::Subscriber land_subscriber_;
   ros::Publisher wrench_pub;
 
   geometry_msgs::TwistStamped command_;
@@ -50,10 +53,11 @@ private:
   double mass_;
   double inertia_[3];
 
-  bool motors_running_ = true;
+  bool motors_running_ = false;
   double linear_z_control_error_;
-  bool stabilized;
   std::string base_link_frame_, drone_index;
+  std::string takeoff_topic_;
+  std::string land_topic_;
   const double gravity = 9.8065;    
 
 public:
@@ -64,7 +68,6 @@ public:
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
-    stabilized = false;
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
     nh.param<std::string>("drone_index", drone_index,"1");
     
@@ -93,6 +96,8 @@ public:
     // ros::Subscriber model_states_subscriber = n.subscribe("/gazebo/model_states", 100, model_states_callback);
     pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
     cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
+    takeoff_subscriber_ = nh.subscribe<std_msgs::Empty>("/drone" + drone_index + "/take_off", 1, &TwistController::TakeoffCallback, this);
+    land_subscriber_ = nh.subscribe<std_msgs::Empty>("/drone" + drone_index + "/land", 1, &TwistController::LandCallback, this);
     last_executed_time = ros::Time::now().toSec();
   }
 
@@ -113,8 +118,8 @@ public:
   {
     command_.twist = *vel; // from cmd_vel
     command_.header.stamp = ros::Time::now();
-    stabilized = true;
-    ROS_INFO("command_z: %f", command_.twist.linear.z); 
+    // ROS_INFO("command_z: %f", command_.twist.linear.z); 
+    update();
   }
   
 /*******************************************************************************
@@ -122,8 +127,6 @@ public:
 *******************************************************************************/
   void poseCommandCallback(const sensor_msgs::Imu::ConstPtr& pose_msg)
   {
-    pose_ = *pose_msg;
-    acceleration_ = *pose_msg; //imu msg consists of linear acc, assign from here directly
     pose_.orientation.x = pose_msg->orientation.x;
     pose_.orientation.y = pose_msg->orientation.y;
     pose_.orientation.z = pose_msg->orientation.z;
@@ -131,9 +134,29 @@ public:
     acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
     acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
     acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
+  }
 
-    // geometry_msgs::TwistStamped twiststamped = twist_;
-    // geometry_msgs::Twist twist = twist_.twist; //extract twist from stamped
+/*******************************************************************************
+* Callback function for takeoff
+*******************************************************************************/
+  void TakeoffCallback(const std_msgs::EmptyConstPtr& msg)
+  {
+    ROS_INFO("%s","\nQuadrotor takes off!!");
+    motors_running_ = true;
+  }
+
+/*******************************************************************************
+* Callback function for landing
+*******************************************************************************/
+  void LandCallback(const std_msgs::EmptyConstPtr& msg)
+  {
+    ROS_INFO("%s","\nQuadrotor landing!!");
+    motors_running_ = false;
+  }
+
+  void update()
+  {
+    //get current twist
     geometry_msgs::Twist twist = twist_.twist; //current twist
     geometry_msgs::Twist twist_body;
     twist_body.linear =  toBody(twist_.twist.linear);
@@ -141,19 +164,17 @@ public:
 
     geometry_msgs::Twist command = this -> command_.twist;
     // ROS_INFO("command_z_inpose: %f", command.linear.z); 
-    // Transform to world coordinates if necessary (yaw only)
-    if (stabilized) {
-      // double yaw = pose_->getYaw();
-      double yaw = getYaw();
-      geometry_msgs::Twist transformed;
-      //command is from cmd_vel
-      transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
-      transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
-      transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
-      transformed.angular.y = sin(yaw) * command.angular.x + cos(yaw) * command.angular.y;
 
-      command = transformed;
-    }
+    // Transform to world coordinates if necessary (yaw only)
+    double yaw = getYaw();
+    geometry_msgs::Twist transformed;
+    //command is from cmd_vel
+    transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
+    transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
+    transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
+    transformed.angular.y = sin(yaw) * command.angular.x + cos(yaw) * command.angular.y;
+
+    command = transformed;
 
     // calculation of load factor
     double load_factor = 1. / (  pose_.orientation.w * pose_.orientation.w
@@ -164,33 +185,37 @@ public:
     // Note: load_factor could be NaN or Inf...?
     if (load_factor_limit > 0.0 && !(load_factor < load_factor_limit)) load_factor = load_factor_limit;
 
-    // Auto engage/shutdown
-    // if (auto_engage_) {
-    //   if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
-    //     motors_running_ = true;
-    //     ROS_INFO_NAMED("twist_controller", "Engaging motors!");
-    //   } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
-    //     double shutdown_limit = 1.0 * std::min(command.linear.z, -0.5);
-    //     if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
-    //     if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
-    //       motors_running_ = false;
-    //       ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
-    //     } else {
-    //       ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
-    //     }
-    //   } else {
-    //     linear_z_control_error_ = 0.0;
-    //   }
+    ROS_INFO("load_factor: %f", load_factor);
 
-      // flip over?
-    //   if (motors_running_ && load_factor < 0.0) {
-    //     motors_running_ = false;
-    //     ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
-    //   }
-    // }
+    //Auto engage/shutdown
+    if (auto_engage_) {
+      if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
+        motors_running_ = true;
+        ROS_INFO_NAMED("twist_controller", "Engaging motors!");
+      } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
+        double shutdown_limit = 1.0 * std::min(command.linear.z, -0.5);
+        
+        if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
+        
+        if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
+          motors_running_ = false;
+          ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
+        } else {
+          ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
+        }
+      } else {
+        linear_z_control_error_ = 0.0;
+      }
+
+    //flip over?
+      if (motors_running_ && load_factor < 0.0) {
+        motors_running_ = false;
+        ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
+      }
+    }
 
     // Update output
-    if (1) {
+    if (motors_running_) {
       current_time = ros::Time::now().toSec();
       time_interval = current_time - last_executed_time;
       last_executed_time = current_time;
@@ -233,11 +258,9 @@ public:
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
       
-      // ROS_INFO_NAMED("twist_controller", "controller running!");
+      ROS_INFO_NAMED("twist_controller", "controller running!");
       wrench_pub.publish(wrench_);
     } 
-    // // start controller if it not running
-    // if (!isRunning()) this->startRequest(command_.header.stamp);
   }
 
   void reset()

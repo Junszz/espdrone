@@ -8,9 +8,11 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Empty
 
 import sys, select, termios, tty
+import argparse
 
 msg = """
 Reading from the keyboard  and Publishing to Twist!
+1: Take_off  2: Landing
 ---------------------------
 Moving around:
    u    i    o
@@ -163,8 +165,10 @@ if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
     pub = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
     rospy.init_node('teleop_twist_keyboard')
-    pub2 = rospy.Publisher('drone/takeoff', Empty, queue_size = 1)
-    pub3 = rospy.Publisher('drone/land', Empty, queue_size = 1)
+    drone_index = str(1) # hard coding lol
+    # drone_index = rospy.get_param("drone_index")
+    pub2 = rospy.Publisher('/drone' + drone_index + '/takeoff', Empty, queue_size = 1)
+    pub3 = rospy.Publisher('/drone' + drone_index + '/land', Empty, queue_size = 1)
     empty_msg = Empty()
     speed = rospy.get_param("~speed", 0.5)
     turn = rospy.get_param("~turn", 1.0)
