@@ -3,6 +3,7 @@
 
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <gazebo_msgs/ModelStates.h>
 #include <sensor_msgs/Imu.h>
 #include <espdrone_msgs/MotorCommand.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -19,15 +20,10 @@ class TwistController
 {
 private:
   ros::NodeHandle nh;
-  // subscriber
   ros::Subscriber pose_subscriber_;
   ros::Subscriber twist_subscriber_;
   ros::Subscriber cmd_vel_subscriber_;
-  // publisher <link>/wrench
   ros::Publisher wrench_pub;
-  // services
-  ros::ServiceServer engage_service_server_;
-  ros::ServiceServer shutdown_service_server_;
 
   geometry_msgs::TwistStamped command_;
   geometry_msgs::WrenchStamped wrench_;
@@ -35,9 +31,7 @@ private:
   espdrone_msgs::MotorCommand motor_;
   sensor_msgs::Imu pose_;
   sensor_msgs::Imu acceleration_;
-
-  bool stabilized;
-  std::string base_link_frame_;
+  const ros::Duration period;
 
   struct {
     struct {
@@ -52,34 +46,24 @@ private:
   double load_factor_limit;
   double mass_;
   double inertia_[3];
-  // double period = 0.01;
 
-  bool motors_running_;
+  bool motors_running_ = true;
   double linear_z_control_error_;
-
-  std::string drone_index;
+  bool stabilized;
+  std::string base_link_frame_, drone_index;
+  const double gravity = 9.8065;    
 
 public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    const ros::Duration period;
-    stabilized = false;
-    mass_ = 0.026; // 26 grams
+    mass_ = 0.01; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
-    inertia_[2] = 1.04978709710599E-05;    // inertia in the form of ixx, iyy, izz
+    inertia_[2] = 1.04978709710599E-05;
+    stabilized = false;
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
     nh.param<std::string>("drone_index", drone_index,"1");
-
-    // subscribe to pose, twist and cmd_vel
-    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
-    twist_subscriber_ = nh.subscribe<geometry_msgs::TwistStamped>("/command/drone" + drone_index + "/twist", 100, &TwistController::twistCommandCallback, this);
-    cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
-    
-    // engage/shutdown service servers
-    // engage_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("engage", &TwistController::engageCallback, this);
-    // shutdown_service_server_ = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("shutdown", &TwistController::shutdownCallback, this);
     
     // wrench publisher
     wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/drone" + drone_index + "/wrench", 1);
@@ -99,116 +83,157 @@ public:
     nh.getParam("limits/torque/xy", limits_.torque.x);
     nh.getParam("limits/torque/xy", limits_.torque.y);
     nh.getParam("limits/torque/z", limits_.torque.z);
+    ROS_INFO_NAMED("twist_controller", "Getting params!");
 
-    // Get current state and command
-    while (ros::ok()){
-      geometry_msgs::Twist command = command_.twist;
-      geometry_msgs::TwistStamped twiststamped = twist_;
-      geometry_msgs::Twist twist = twist_.twist;
-      geometry_msgs::Twist twist_body;
-      twist_body.linear =  toBody(twist.linear);
-      twist_body.angular = toBody(twist.angular);
+    // subscribe to pose, twist and cmd_vel
+    twist_subscriber_ = nh.subscribe("/gazebo/model_states", 1, &TwistController::twistCommandCallback, this);
+    // ros::Subscriber model_states_subscriber = n.subscribe("/gazebo/model_states", 100, model_states_callback);
+    pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
+    cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
+    
+  }
 
-      // Transform to world coordinates if necessary (yaw only)
-      if (stabilized) {
-        // double yaw = pose_->getYaw();
-        double yaw = getYaw();
-        geometry_msgs::Twist transformed;
+/*******************************************************************************
+* Callback function for twist command
+*******************************************************************************/
+  void twistCommandCallback(gazebo_msgs::ModelStates msg)
+  {
+    twist_.twist = msg.twist[9];
+    twist_.header.stamp = ros::Time::now();
 
-        transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
-        transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
-        transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
-        transformed.angular.y = sin(yaw) * command.angular.x + cos(yaw) * command.angular.y;
-
-        command = transformed;
-      }
-
-      // Get gravity and load factor
-      // load factor is equal to 1 when the aircraft is static on the ground
-      const double gravity = 9.8065;
-
-      // calculation of load factor
-      double load_factor = 1. / (  pose_.orientation.w * pose_.orientation.w
-                                  - pose_.orientation.x * pose_.orientation.x
-                                  - pose_.orientation.y * pose_.orientation.y
-                                  + pose_.orientation.z * pose_.orientation.z );
-  
-      // Note: load_factor could be NaN or Inf...?
-      if (load_factor_limit > 0.0 && !(load_factor < load_factor_limit)) load_factor = load_factor_limit;
-
-      // Auto engage/shutdown
-      if (auto_engage_) {
-        if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
-          motors_running_ = true;
-          ROS_INFO_NAMED("twist_controller", "Engaging motors!");
-        } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
-          double shutdown_limit = 0.25 * std::min(command.linear.z, -0.5);
-          if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
-          if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
-            motors_running_ = false;
-            ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
-          } else {
-            ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
-          }
-        } else {
-          linear_z_control_error_ = 0.0;
-        }
-
-        // flip over?
-        if (motors_running_ && load_factor < 0.0) {
-          motors_running_ = false;
-          ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
-        }
-      }
-
-      // Update output
-      if (motors_running_) {
-        geometry_msgs::Vector3 acceleration_command;
-        acceleration_command.x = pid_.linear.x.update(command.linear.x, twist.linear.x, acceleration_.linear_acceleration.x, period);
-        acceleration_command.y = pid_.linear.y.update(command.linear.y, twist.linear.y, acceleration_.linear_acceleration.y, period);
-        acceleration_command.z = pid_.linear.z.update(command.linear.z, twist.linear.z, acceleration_.linear_acceleration.z, period) + gravity;
-        geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
-
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist.linear.x << " " << twist.linear.y << " " << twist.linear.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration:               [" << acceleration_.linear_acceleration.x << " " << acceleration_.linear_acceleration.y << " " << acceleration_.linear_acceleration.z<< "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_world: [" << acceleration_command.x << " " << acceleration_command.y << " " << acceleration_command.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_body:  [" << acceleration_command_body.x << " " << acceleration_command_body.y << " " << acceleration_command_body.z << "]");
-
-        wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, period);
-        wrench_.wrench.torque.y = inertia_[1] * pid_.angular.y.update( acceleration_command_body.x / gravity, 0.0, twist_body.angular.y, period);
-        wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist.angular.z, 0.0, period);
-        wrench_.wrench.force.x  = 0.0;
-        wrench_.wrench.force.y  = 0.0;
-        wrench_.wrench.force.z  = mass_ * ((acceleration_command.z - gravity) * load_factor + gravity);
-
-        if (limits_.force.z > 0.0 && wrench_.wrench.force.z > limits_.force.z) wrench_.wrench.force.z = limits_.force.z;
-        if (wrench_.wrench.force.z <= std::numeric_limits<double>::min()) wrench_.wrench.force.z = std::numeric_limits<double>::min();
-        if (limits_.torque.x > 0.0) {
-          if (wrench_.wrench.torque.x >  limits_.torque.x) wrench_.wrench.torque.x =  limits_.torque.x;
-          if (wrench_.wrench.torque.x < -limits_.torque.x) wrench_.wrench.torque.x = -limits_.torque.x;
-        }
-        if (limits_.torque.y > 0.0) {
-          if (wrench_.wrench.torque.y >  limits_.torque.y) wrench_.wrench.torque.y =  limits_.torque.y;
-          if (wrench_.wrench.torque.y < -limits_.torque.y) wrench_.wrench.torque.y = -limits_.torque.y;
-        }
-        if (limits_.torque.z > 0.0) {
-          if (wrench_.wrench.torque.z >  limits_.torque.z) wrench_.wrench.torque.z =  limits_.torque.z;
-          if (wrench_.wrench.torque.z < -limits_.torque.z) wrench_.wrench.torque.z = -limits_.torque.z;
-        }
-
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
-        ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
-
-        wrench_pub.publish(wrench_);
-      } 
-
-      else {reset();}
-    }
   }
   
+/*******************************************************************************
+* Callback function for cmd_vel msg
+*******************************************************************************/
+  void cmd_velCommandCallback(const geometry_msgs::TwistConstPtr& vel)
+  {
+    command_.twist = *vel; // from cmd_vel
+    command_.header.stamp = ros::Time::now();
+    stabilized = true;
+
+  }
+  
+/*******************************************************************************
+* Callback function for pose msg
+*******************************************************************************/
+  void poseCommandCallback(const sensor_msgs::Imu::ConstPtr& pose_msg)
+  {
+    pose_ = *pose_msg;
+    acceleration_ = *pose_msg; //imu msg consists of linear acc, assign from here directly
+    pose_.orientation.x = pose_msg->orientation.x;
+    pose_.orientation.y = pose_msg->orientation.y;
+    pose_.orientation.z = pose_msg->orientation.z;
+    pose_.orientation.w = pose_msg->orientation.w;
+    acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
+    acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
+    acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
+
+    // geometry_msgs::TwistStamped twiststamped = twist_;
+    // geometry_msgs::Twist twist = twist_.twist; //extract twist from stamped
+    geometry_msgs::Twist twist = twist_.twist; //current twist
+    geometry_msgs::Twist twist_body;
+    twist_body.linear =  toBody(twist_.twist.linear);
+    twist_body.angular = toBody(twist_.twist.angular);
+
+    geometry_msgs::Twist command = command_.twist;
+
+    // Transform to world coordinates if necessary (yaw only)
+    if (stabilized) {
+      // double yaw = pose_->getYaw();
+      double yaw = getYaw();
+      geometry_msgs::Twist transformed;
+      //command is from cmd_vel
+      transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
+      transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
+      transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
+      transformed.angular.y = sin(yaw) * command.angular.x + cos(yaw) * command.angular.y;
+
+      command = transformed;
+    }
+
+    // calculation of load factor
+    double load_factor = 1. / (  pose_.orientation.w * pose_.orientation.w
+                                 - pose_.orientation.x * pose_.orientation.x
+                                 - pose_.orientation.y * pose_.orientation.y
+                                 + pose_.orientation.z * pose_.orientation.z );
+ 
+    // Note: load_factor could be NaN or Inf...?
+    if (load_factor_limit > 0.0 && !(load_factor < load_factor_limit)) load_factor = load_factor_limit;
+
+    // Auto engage/shutdown
+    // if (auto_engage_) {
+    //   if (!motors_running_ && command.linear.z > 0.1 && load_factor > 0.0) {
+    //     motors_running_ = true;
+    //     ROS_INFO_NAMED("twist_controller", "Engaging motors!");
+    //   } else if (motors_running_ && command.linear.z < -0.1 /* && (twist.linear.z > -0.1 && twist.linear.z < 0.1) */) {
+    //     double shutdown_limit = 1.0 * std::min(command.linear.z, -0.5);
+    //     if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
+    //     if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
+    //       motors_running_ = false;
+    //       ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
+    //     } else {
+    //       ROS_DEBUG_STREAM_NAMED("twist_controller", "z control error = " << linear_z_control_error_ << " >= " << shutdown_limit);
+    //     }
+    //   } else {
+    //     linear_z_control_error_ = 0.0;
+    //   }
+
+      // flip over?
+    //   if (motors_running_ && load_factor < 0.0) {
+    //     motors_running_ = false;
+    //     ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
+    //   }
+    // }
+
+    // Update output
+    if (1) {
+      geometry_msgs::Vector3 acceleration_command;
+      acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, period);
+      acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, period);
+      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, period) + gravity;
+      geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
+
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration:               [" << acceleration_.linear_acceleration.x << " " << acceleration_.linear_acceleration.y << " " << acceleration_.linear_acceleration.z<< "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_world: [" << acceleration_command.x << " " << acceleration_command.y << " " << acceleration_command.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_body:  [" << acceleration_command_body.x << " " << acceleration_command_body.y << " " << acceleration_command_body.z << "]");
+
+      wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, period);
+      wrench_.wrench.torque.y = inertia_[1] * pid_.angular.y.update( acceleration_command_body.x / gravity, 0.0, twist_body.angular.y, period);
+      wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist_.twist.angular.z, 0.0, period);
+      wrench_.wrench.force.x  = 0.0;
+      wrench_.wrench.force.y  = 0.0;
+      wrench_.wrench.force.z  = mass_ * ((acceleration_command.z - gravity) * load_factor + gravity);
+
+      if (limits_.force.z > 0.0 && wrench_.wrench.force.z > limits_.force.z) wrench_.wrench.force.z = limits_.force.z;
+      if (wrench_.wrench.force.z <= std::numeric_limits<double>::min()) wrench_.wrench.force.z = std::numeric_limits<double>::min();
+      if (limits_.torque.x > 0.0) {
+        if (wrench_.wrench.torque.x >  limits_.torque.x) wrench_.wrench.torque.x =  limits_.torque.x;
+        if (wrench_.wrench.torque.x < -limits_.torque.x) wrench_.wrench.torque.x = -limits_.torque.x;
+      }
+      if (limits_.torque.y > 0.0) {
+        if (wrench_.wrench.torque.y >  limits_.torque.y) wrench_.wrench.torque.y =  limits_.torque.y;
+        if (wrench_.wrench.torque.y < -limits_.torque.y) wrench_.wrench.torque.y = -limits_.torque.y;
+      }
+      if (limits_.torque.z > 0.0) {
+        if (wrench_.wrench.torque.z >  limits_.torque.z) wrench_.wrench.torque.z =  limits_.torque.z;
+        if (wrench_.wrench.torque.z < -limits_.torque.z) wrench_.wrench.torque.z = -limits_.torque.z;
+      }
+
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
+      ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
+      
+      ROS_INFO_NAMED("twist_controller", "controller running!");
+      wrench_pub.publish(wrench_);
+    } 
+    // // start controller if it not running
+    // if (!isRunning()) this->startRequest(command_.header.stamp);
+  }
+
   void reset()
   {
     pid_.linear.x.reset();
@@ -229,84 +254,16 @@ public:
     motors_running_ = false;
   }
 
-/*******************************************************************************
-* Callback function for twistcommand
-*******************************************************************************/
-  void twistCommandCallback(const geometry_msgs::TwistStampedConstPtr& twist)
-  {
-    twist_ = *twist;
-    if (command_.header.stamp.isZero()) command_.header.stamp = ros::Time::now();
-      stabilized = false;
-
-    // // start controller if it not running
-    // if (!isRunning()) this->startRequest(command_.header.stamp);
-  }
-  
-/*******************************************************************************
-* Callback function for cmd_vel msg
-*******************************************************************************/
-  void cmd_velCommandCallback(const geometry_msgs::TwistConstPtr& command)
-  {
-    command_.twist = *command;
-    command_.header.stamp = ros::Time::now();
-    stabilized = true;
-
-    // // start controller if it not running
-    //  if (!isRunning()) this->startRequest(command_.header.stamp);
-  }
-  
-/*******************************************************************************
-* Callback function for pose msg
-*******************************************************************************/
-  void poseCommandCallback(const sensor_msgs::Imu::ConstPtr& pose_msg)
-  {
-    pose_ = *pose_msg;
-    acceleration_ = *pose_msg; //imu msg consists of linear acc, assign from here directly
-    pose_.orientation.x = pose_msg->orientation.x;
-    pose_.orientation.y = pose_msg->orientation.y;
-    pose_.orientation.z = pose_msg->orientation.z;
-    pose_.orientation.w = pose_msg->orientation.w;
-    acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
-    acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
-    acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
-
-    // // start controller if it not running
-    // if (!isRunning()) this->startRequest(command_.header.stamp);
-  }
-
-  bool engageCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
-  {
-    ROS_INFO_NAMED("twist_controller", "Engaging motors!");
-    motors_running_ = true;
-    return true;
-  }
-
-  bool shutdownCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
-  {
-    ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
-    motors_running_ = false;
-    return true;
-  }
-
   void starting(const ros::Time &time)
-  {
-    reset();
-    // wrench_output_->start();
-  }
+  {}
 
   void stopping(const ros::Time &time)
-  {
-    // wrench_output_->stop();
-  }
+  {}
 
   // find yaw from quartenion
   double getYaw() const
   {
     tf2::Quaternion q;
-    // const Quaternion::_w_type& w = pose_.orientation.w;
-    // const Quaternion::_x_type& x = pose_.orientation.x;
-    // const Quaternion::_y_type& y = pose_.orientation.y;
-    // const Quaternion::_z_type& z = pose_.orientation.z;
     q[0] = pose_.orientation.x;
     q[1] = pose_.orientation.y;
     q[2] = pose_.orientation.z;
@@ -317,13 +274,8 @@ public:
   geometry_msgs::Vector3 toBody(geometry_msgs::Vector3& nav) const
   {
     tf2::Quaternion q;
-    // const Quaternion::_w_type& w = pose_.orientation.w;
-    // const Quaternion::_x_type& x = pose_.orientation.x;
-    // const Quaternion::_y_type& y = pose_.orientation.y;
-    // const Quaternion::_z_type& z = pose_.orientation.z;
     q[0] = pose_.orientation.x;
     q[1] = pose_.orientation.y;
-    q[2] = pose_.orientation.z;
     q[3] = pose_.orientation.w;
     geometry_msgs::Vector3 body;
     body.x = (q[3]*q[3]+q[0]*q[0]-q[1]*q[1]-q[2]*q[2]) * nav.x + (2.*q[0]*q[1] + 2.*q[3]*q[2]) * nav.y + (2.*q[0]*q[2] - 2.*q[3]*q[2]) * nav.z;

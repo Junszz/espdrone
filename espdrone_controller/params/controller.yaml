@@ -1,6 +1,6 @@
 controller:
     twist:
-        type: espdrone_controller/TwistController
+        type: TwistController
         linear/xy:
             k_p: 5.0
             k_i: 1.0
