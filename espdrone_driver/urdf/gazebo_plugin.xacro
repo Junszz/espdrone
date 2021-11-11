@@ -129,7 +129,7 @@
 			</plugin>
 		</gazebo>
 	  
-			<!-- Uptrust force plugin for propellers -->
+			<!-- Uptrust force plugin for propellers
 		<gazebo>
 			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
@@ -151,7 +151,6 @@
 		</gazebo>
 		
 		<gazebo>
-			<!-- Provide a Negative Velocity -->
 			<plugin name="FR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -172,7 +171,6 @@
 		</gazebo>
 		
 		<gazebo>
-			<!-- Provide a Positive Velocity -->
 			<plugin name="BL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -193,7 +191,6 @@
 		</gazebo>
 		
 		<gazebo>
-			<!-- Provide a Positive Velocity -->
 			<plugin name="BR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -211,7 +208,7 @@
 				<link_name>BR_link_$(arg drone_index)</link_name>
 				<control_joint>BR_joint_$(arg drone_index)</control_joint>
 			</plugin>
-		</gazebo>
+		</gazebo> -->
 
 	<gazebo reference="BR_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
