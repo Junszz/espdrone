@@ -32,6 +32,9 @@ private:
   sensor_msgs::Imu pose_;
   sensor_msgs::Imu acceleration_;
   const ros::Duration period;
+  double last_executed_time;
+  double time_interval;
+  double current_time;
 
   struct {
     struct {
@@ -57,7 +60,7 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.01; // 26 grams
+    mass_ = 0.024; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
@@ -90,7 +93,7 @@ public:
     // ros::Subscriber model_states_subscriber = n.subscribe("/gazebo/model_states", 100, model_states_callback);
     pose_subscriber_ = nh.subscribe<sensor_msgs::Imu>("/drone" + drone_index + "/imu", 1, &TwistController::poseCommandCallback, this);
     cmd_vel_subscriber_ = nh.subscribe<geometry_msgs::Twist>("/drone" + drone_index + "/cmd_vel", 1, &TwistController::cmd_velCommandCallback, this);
-    
+    last_executed_time = ros::Time::now().toSec();
   }
 
 /*******************************************************************************
@@ -111,7 +114,7 @@ public:
     command_.twist = *vel; // from cmd_vel
     command_.header.stamp = ros::Time::now();
     stabilized = true;
-
+    ROS_INFO("command_z: %f", command_.twist.linear.z); 
   }
   
 /*******************************************************************************
@@ -188,23 +191,27 @@ public:
 
     // Update output
     if (1) {
+      current_time = ros::Time::now().toSec();
+      time_interval = current_time - last_executed_time;
+      last_executed_time = current_time;
+
       geometry_msgs::Vector3 acceleration_command;
-      acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, period);
-      acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, period);
-      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, period) + gravity;
+      acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, time_interval);
+      acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, time_interval);
+      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, time_interval) + gravity;
       geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
 
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration:               [" << acceleration_.linear_acceleration.x << " " << acceleration_.linear_acceleration.y << " " << acceleration_.linear_acceleration.z<< "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_world: [" << acceleration_command.x << " " << acceleration_command.y << " " << acceleration_command.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_body:  [" << acceleration_command_body.x << " " << acceleration_command_body.y << " " << acceleration_command_body.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.linear:       [" << command.linear.x << " " << command.linear.y << " " << command.linear.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration:               [" << acceleration_.linear_acceleration.x << " " << acceleration_.linear_acceleration.y << " " << acceleration_.linear_acceleration.z<< "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_world: [" << acceleration_command.x << " " << acceleration_command.y << " " << acceleration_command.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_body:  [" << acceleration_command_body.x << " " << acceleration_command_body.y << " " << acceleration_command_body.z << "]");
 
-      wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, period);
-      wrench_.wrench.torque.y = inertia_[1] * pid_.angular.y.update( acceleration_command_body.x / gravity, 0.0, twist_body.angular.y, period);
-      wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist_.twist.angular.z, 0.0, period);
+      wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, time_interval);
+      wrench_.wrench.torque.y = inertia_[1] * pid_.angular.y.update( acceleration_command_body.x / gravity, 0.0, twist_body.angular.y, time_interval);
+      wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist_.twist.angular.z, 0.0, time_interval);
       wrench_.wrench.force.x  = 0.0;
       wrench_.wrench.force.y  = 0.0;
       wrench_.wrench.force.z  = mass_ * ((acceleration_command.z - gravity) * load_factor + gravity);
@@ -224,10 +231,10 @@ public:
         if (wrench_.wrench.torque.z < -limits_.torque.z) wrench_.wrench.torque.z = -limits_.torque.z;
       }
 
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
-      ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
+      // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
       
-      ROS_INFO_NAMED("twist_controller", "controller running!");
+      // ROS_INFO_NAMED("twist_controller", "controller running!");
       wrench_pub.publish(wrench_);
     } 
     // // start controller if it not running
