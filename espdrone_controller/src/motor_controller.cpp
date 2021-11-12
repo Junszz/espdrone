@@ -102,6 +102,8 @@ public:
       wrench_pub3.publish(tmp_wrench);
       tmp_wrench.force.z = force4;
       wrench_pub4.publish(tmp_wrench);
+
+      ROS_INFO("wrench_FL: %f wrench_FR: %f wrench_BR: %f wrench_BL: %f", force1, force2, force3, force4);
       
       vel_pub1.publish(vel1);
       vel_pub2.publish(vel2);
@@ -116,6 +118,7 @@ public:
       wrench_.wrench.torque.y = 0.0;
       wrench_.wrench.torque.z = 0.0;
     }
+    
   }
 };
 

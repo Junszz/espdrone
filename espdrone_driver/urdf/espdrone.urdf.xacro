@@ -276,12 +276,12 @@
       <mass
         value="0.001" />
       <inertia
-        ixx="2.527E-09"
-        ixy="-1.7953E-15"
+        ixx="2.527E-17"
+        ixy="-1.7953E-17"
         ixz="-1.0419E-17"
-        iyy="1.4314E-09"
-        iyz="-4.3461E-15"
-        izz="1.4307E-09" />
+        iyy="1.4314E-17"
+        iyz="-4.3461E-17"
+        izz="1.4307E-17" />
     </inertial>
     <visual>
       <origin
