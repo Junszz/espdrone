@@ -37,7 +37,7 @@ public:
   double update(double input, double x, double dx, double dt);
   double update(double error, double dx, double dt);
 
-  double getFilteredControlError(double& filtered_error, double time_constant, const ros::Duration& dt);
+  double getFilteredControlError(double& filtered_error, double time_constant, double dt);
 };
 }
 
