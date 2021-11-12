@@ -145,9 +145,9 @@ double PID::update(double error, double dx, double dt)
   return output;
 }
 
-double PID::getFilteredControlError(double& filtered_error, double time_constant, const ros::Duration& dt)
+double PID::getFilteredControlError(double& filtered_error, double time_constant, double dt)
 {
-  double dt_sec = dt.toSec();
+  double dt_sec = dt;
   filtered_error = checknan(filtered_error);
   if (dt_sec + time_constant > 0.0) {
     filtered_error = (time_constant * filtered_error + dt_sec * state_.p) / (dt_sec + time_constant);

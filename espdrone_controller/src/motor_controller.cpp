@@ -73,26 +73,26 @@ public:
     if (wrench_.wrench.force.z > 0.0) {
       double nominal_thrust_per_motor = wrench_.wrench.force.z / 4.0;
 
-      force1 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
-      vel1.data = sqrt(force1/coefficient);
-      force2 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
-      vel2.data = sqrt(force2/coefficient);
-      force3 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
-      vel3.data = sqrt(force3/coefficient);
-      force4 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
-      vel4.data = sqrt(force4/coefficient);
-
-      // force1 =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 2.0 / lever;
+      // force1 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
       // vel1.data = sqrt(force1/coefficient);
-
-      // force2 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 2.0 / lever;
-      // vel2.data = sqrt(force1/coefficient);
-
-      // force3 =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 2.0 / lever;
+      // force2 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
+      // vel2.data = sqrt(force2/coefficient);
+      // force3 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever - wrench_.wrench.torque.y / 4.0 / lever;
       // vel3.data = sqrt(force3/coefficient);
-
-      // force4 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 2.0 / lever;
+      // force4 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 4.0 / lever + wrench_.wrench.torque.y / 4.0 / lever;
       // vel4.data = sqrt(force4/coefficient);
+
+      force1 =  nominal_thrust_per_motor + wrench_.wrench.torque.y / 2.0 / lever;
+      vel1.data = sqrt(force1/coefficient);
+
+      force2 =  nominal_thrust_per_motor + wrench_.wrench.torque.x / 2.0 / lever;
+      vel2.data = sqrt(force1/coefficient);
+
+      force3 =  nominal_thrust_per_motor - wrench_.wrench.torque.y / 2.0 / lever;
+      vel3.data = sqrt(force3/coefficient);
+
+      force4 =  nominal_thrust_per_motor - wrench_.wrench.torque.x / 2.0 / lever;
+      vel4.data = sqrt(force4/coefficient);
 
       tmp_wrench.force.z = force1;
       wrench_pub1.publish(tmp_wrench);

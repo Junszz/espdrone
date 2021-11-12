@@ -163,11 +163,13 @@ def vels(speed, turn):
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
+
     rospy.init_node('teleop_twist_keyboard')
-    drone_index = str(1) # hard coding lol
-    # drone_index = rospy.get_param("drone_index")
-    pub2 = rospy.Publisher('/drone' + drone_index + '/takeoff', Empty, queue_size = 1)
+    # drone_index = str(1) # hard coding lol
+    drone_index = rospy.get_param("~drone_index")
+    drone_index = str(drone_index)
+    pub = rospy.Publisher('/drone' + drone_index + '/cmd_vel', Twist, queue_size = 1)
+    pub2 = rospy.Publisher('/drone' + drone_index + '/take_off', Empty, queue_size = 1)
     pub3 = rospy.Publisher('/drone' + drone_index + '/land', Empty, queue_size = 1)
     empty_msg = Empty()
     speed = rospy.get_param("~speed", 0.5)
