@@ -64,7 +64,7 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.025; // 26 grams
+    mass_ = 0.024; // 26 grams
     inertia_[0] = 5.69029262704911E-06;
     inertia_[1] = 5.38757483059318E-06;
     inertia_[2] = 1.04978709710599E-05;
@@ -119,7 +119,6 @@ public:
     command_.twist = *vel; // from cmd_vel
     command_.header.stamp = ros::Time::now();
     // ROS_INFO("command_z: %f", command_.twist.linear.z); 
-    update();
   }
   
 /*******************************************************************************
@@ -134,6 +133,7 @@ public:
     acceleration_.linear_acceleration.x = pose_msg->linear_acceleration.x;
     acceleration_.linear_acceleration.y = pose_msg->linear_acceleration.y;
     acceleration_.linear_acceleration.z = pose_msg->linear_acceleration.z;
+    update();
   }
 
 /*******************************************************************************
@@ -185,7 +185,7 @@ public:
     // Note: load_factor could be NaN or Inf...?
     if (load_factor_limit > 0.0 && !(load_factor < load_factor_limit)) load_factor = load_factor_limit;
 
-    ROS_INFO("load_factor: %f", load_factor);
+    // ROS_INFO("load_factor: %f", load_factor);
 
     //Auto engage/shutdown
     if (auto_engage_) {
@@ -197,7 +197,7 @@ public:
         
         if (linear_z_control_error_ > 0.0) linear_z_control_error_ = 0.0; // positive control errors should not affect shutdown
         
-        if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, period) < shutdown_limit) {
+        if (pid_.linear.z.getFilteredControlError(linear_z_control_error_, 5.0, time_interval) < shutdown_limit) {
           motors_running_ = false;
           ROS_INFO_NAMED("twist_controller", "Shutting down motors!");
         } else {
