@@ -64,10 +64,12 @@ public:
   TwistController(): nh("~")
   { 
     // init params (only once during startup)
-    mass_ = 0.024; // 26 grams
-    inertia_[0] = 5.69029262704911E-06;
-    inertia_[1] = 5.38757483059318E-06;
-    inertia_[2] = 1.04978709710599E-05;
+    // inertia = link->GetInertial()->PrincipalMoments();
+    // mass = link->GetInertial()->Mass();
+    mass_ = 0.5; // 26 grams
+    inertia_[0] = 0.000006;
+    inertia_[1] = 0.000006;
+    inertia_[2] = 0.000011;
     nh.param<std::string>("base_link_frame", base_link_frame_,"base_link");
     nh.param<std::string>("drone_index", drone_index,"1");
     
@@ -118,6 +120,7 @@ public:
   {
     command_.twist = *vel; // from cmd_vel
     command_.header.stamp = ros::Time::now();
+    // ROS_WARN("in call back: %f", command_.twist.linear.z);
     // ROS_INFO("command_z: %f", command_.twist.linear.z); 
   }
   
@@ -163,7 +166,9 @@ public:
     twist_body.angular = toBody(twist_.twist.angular);
 
     geometry_msgs::Twist command = this -> command_.twist;
-    // ROS_INFO("command_z_inpose: %f", command.linear.z); 
+    // ROS_WARN("in call back: %f", command_.twist.linear.z);
+    // ROS_WARN("in call back command.linear.z: %f", command.linear.z);
+    // ROS_INFO("command_z_inpose: %f", command.acceleration_commandlinear.z); 
 
     // Transform to world coordinates if necessary (yaw only)
     double yaw = getYaw();
@@ -171,8 +176,10 @@ public:
     //command is from cmd_vel
     transformed.linear.x  = cos(yaw) * command.linear.x  - sin(yaw) * command.linear.y;
     transformed.linear.y  = sin(yaw) * command.linear.x  + cos(yaw) * command.linear.y;
+    transformed.linear.z  = command.linear.z;
     transformed.angular.x = cos(yaw) * command.angular.x - sin(yaw) * command.angular.y;
     transformed.angular.y = sin(yaw) * command.angular.x + cos(yaw) * command.angular.y;
+    transformed.angular.z  = command.angular.z;
 
     command = transformed;
 
@@ -210,7 +217,8 @@ public:
     //flip over?
       if (motors_running_ && load_factor < 0.0) {
         motors_running_ = false;
-        ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over!");
+        ROS_WARN_NAMED("twist_controller", "Shutting down motors due to flip over! If drone stays upside down, holding key [3] until it flipped successfully");
+        reset();
       }
     }
 
@@ -223,7 +231,7 @@ public:
       geometry_msgs::Vector3 acceleration_command;
       acceleration_command.x = pid_.linear.x.update(command.linear.x, twist_.twist.linear.x, acceleration_.linear_acceleration.x, time_interval);
       acceleration_command.y = pid_.linear.y.update(command.linear.y, twist_.twist.linear.y, acceleration_.linear_acceleration.y, time_interval);
-      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, time_interval) + gravity;
+      acceleration_command.z = pid_.linear.z.update(command.linear.z, twist_.twist.linear.z, acceleration_.linear_acceleration.z, time_interval);
       geometry_msgs::Vector3 acceleration_command_body = toBody(acceleration_command);
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist.linear:               [" << twist_.twist.linear.x << " " << twist_.twist.linear.y << " " << twist_.twist.linear.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_body.angular:         [" << twist_body.angular.x << " " << twist_body.angular.y << " " << twist_body.angular.z << "]");
@@ -231,6 +239,7 @@ public:
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "twist_command.angular:      [" << command.angular.x << " " << command.angular.y << " " << command.angular.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration:               [" << acceleration_.linear_acceleration.x << " " << acceleration_.linear_acceleration.y << " " << acceleration_.linear_acceleration.z<< "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_world: [" << acceleration_command.x << " " << acceleration_command.y << " " << acceleration_command.z << "]");
+      // ROS_WARN("current: %f, input: %f, acceleration_command_z: %f ",twist_.twist.linear.x,command.linear.z, acceleration_command.z);
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "acceleration_command_body:  [" << acceleration_command_body.x << " " << acceleration_command_body.y << " " << acceleration_command_body.z << "]");
 
       wrench_.wrench.torque.x = inertia_[0] * pid_.angular.x.update(-acceleration_command_body.y / gravity, 0.0, twist_body.angular.x, time_interval);
@@ -238,7 +247,8 @@ public:
       wrench_.wrench.torque.z = inertia_[2] * pid_.angular.z.update( command.angular.z, twist_.twist.angular.z, 0.0, time_interval);
       wrench_.wrench.force.x  = 0.0;
       wrench_.wrench.force.y  = 0.0;
-      wrench_.wrench.force.z  = mass_ * ((acceleration_command.z - gravity) * load_factor + gravity);
+      wrench_.wrench.force.z  = mass_ * (acceleration_command.z * load_factor + gravity);
+      
 
       if (limits_.force.z > 0.0 && wrench_.wrench.force.z > limits_.force.z) wrench_.wrench.force.z = limits_.force.z;
       if (wrench_.wrench.force.z <= std::numeric_limits<double>::min()) wrench_.wrench.force.z = std::numeric_limits<double>::min();
@@ -258,7 +268,7 @@ public:
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.force:       [" << wrench_.wrench.force.x << " " << wrench_.wrench.force.y << " " << wrench_.wrench.force.z << "]");
       // ROS_DEBUG_STREAM_NAMED("twist_controller", "wrench_command.torque:      [" << wrench_.wrench.torque.x << " " << wrench_.wrench.torque.y << " " << wrench_.wrench.torque.z << "]");
       
-      ROS_INFO_NAMED("twist_controller", "controller running!");
+      // ROS_INFO_NAMED("twist_controller", "controller running!");
       wrench_pub.publish(wrench_);
     } 
   }
@@ -278,6 +288,7 @@ public:
     wrench_.wrench.torque.x = 0.0;
     wrench_.wrench.torque.y = 0.0;
     wrench_.wrench.torque.z = 0.0;
+    wrench_pub.publish(wrench_);
 
     linear_z_control_error_ = 0.0;
     motors_running_ = false;

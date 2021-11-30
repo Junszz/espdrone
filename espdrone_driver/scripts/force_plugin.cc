@@ -35,6 +35,10 @@ namespace gazebo
         this->link_name = _sdf->GetElement("linkName")->Get<std::string>();
 
       this->link = _model->GetLink(this->link_name);
+      inertia = link->GetInertial()->PrincipalMoments();
+      mass = link->GetInertial()->Mass();
+      ROS_WARN("inertia: %f, %f, %f",inertia[0],inertia[1],inertia[2]);
+      ROS_WARN("mass: %f ",mass);
 
       // Listen to the update event. This event is broadcast every simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -79,6 +83,7 @@ namespace gazebo
     {
       //apply force to the link in vector 3d (x,y,z) format 
       this->link->AddRelativeForce(this->link_force);
+      this->link->AddRelativeTorque(this->link_torque);
       //plan 2: AddLinkForce (const ignition::math::Vector3d &_force, const ignition::math::Vector3d &_offset=ignition::math::Vector3d::Zero)
 
     }
@@ -88,7 +93,9 @@ namespace gazebo
     {
       //extract force from wrench message and changed it to vector3d
       ignition::math::Vector3d force_3d(msg -> force.x, msg -> force.y, msg -> force.z);
+      ignition::math::Vector3d torque_3d(msg -> torque.x, msg -> torque.y, msg -> torque.z);
       this->link_force = ignition::math::Vector3d(force_3d);
+      this->link_torque = ignition::math::Vector3d(torque_3d);
     }
     
     /// \brief ROS helper function that processes messages
@@ -101,8 +108,10 @@ namespace gazebo
       }
     }
 
-    
+    private: ignition::math::Vector3d inertia;
+    private: double mass;
     private: ignition::math::Vector3d link_force;
+    private: ignition::math::Vector3d link_torque;
     private: std::string robot_namespace_;
     /// \brief A pointer to the Gazebo joint
 

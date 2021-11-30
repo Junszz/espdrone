@@ -4,15 +4,16 @@ import threading
 
 import rospy
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Wrench
 from std_msgs.msg import Empty
 
 import sys, select, termios, tty
 import argparse
 
+drone_mass = 0.5
 msg = """
 Reading from the keyboard  and Publishing to Twist!
-1: Take_off  2: Landing
+1: Take_off  2: Landing  3: flip drone
 ---------------------------
 Moving around:
    u    i    o
@@ -116,7 +117,7 @@ class PublishThread(threading.Thread):
         self.done = True
         self.update(0, 0, 0, 0, 0, 0)
         self.join()
-
+        
     def run(self):
         twist = Twist()
         while not self.done:
@@ -156,6 +157,7 @@ def getKey(key_timeout):
         key = ''
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
+ 
 
 
 def vels(speed, turn):
@@ -171,8 +173,9 @@ if __name__=="__main__":
     pub = rospy.Publisher('/drone' + drone_index + '/cmd_vel', Twist, queue_size = 1)
     pub2 = rospy.Publisher('/drone' + drone_index + '/take_off', Empty, queue_size = 1)
     pub3 = rospy.Publisher('/drone' + drone_index + '/land', Empty, queue_size = 1)
+    pub4 = rospy.Publisher('/drone' + drone_index + '/FL_link_' + drone_index +"/wrench", Wrench, queue_size = 1)
     empty_msg = Empty()
-    speed = rospy.get_param("~speed", 0.5)
+    speed = rospy.get_param("~speed", 0.05)
     turn = rospy.get_param("~turn", 1.0)
     repeat = rospy.get_param("~repeat_rate", 0.0)
     key_timeout = rospy.get_param("~key_timeout", 0.0)
@@ -214,6 +217,16 @@ if __name__=="__main__":
                 pub2.publish(empty_msg)
             elif key == '2':
                 pub3.publish(empty_msg)
+            elif key == '3':
+                value = drone_mass*300
+                tmp_wrench = Wrench()
+                tmp_wrench.force.z = -1*value
+                #publish impulse value to flip the drone
+                print("flip")
+                pub4.publish(tmp_wrench)
+                tmp_wrench.force.z = 0
+                print("stop")
+                pub4.publish(tmp_wrench)
             
             else:
                 # Skip updating cmd_vel if key timeout and robot already

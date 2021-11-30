@@ -76,4 +76,18 @@ This should load the Quadcopter.
 
 ![Image](https://github.com/Junszz/espdrone/blob/main/Image.png)
 
+7. Controlling the drone
+
+Run the following command:
+```
+roslaunch espdrone_controller controller.launch
+```
+This will launch teleop for user to send desire velocity to the controllers.
 The pid values are in the espdrone_controller/config/espdrone.yaml file in your espdrone directory. Play around with the values to see some control theory in action!
+
+8. Project current state
+
+The controller is not completed yet as it is not stable, causing the drone keep flipping over.
+
+
+
