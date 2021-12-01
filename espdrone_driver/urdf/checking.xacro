@@ -99,39 +99,9 @@
 		    </plugin>
 		  </sensor>
 		</gazebo>
-		    
-			<!-- Ground truth plugin -->
-		<!-- <gazebo>
-			<plugin name="quadrotor_groundtruth_sim" filename="libgazebo_ros_p3d.so">
-            <updateRate>100.0</updateRate>
-            <bodyName>base_link</bodyName>
-            <topicName>ground_truth/state</topicName>
-            <gaussianNoise>0.0</gaussianNoise>
-            <frameName>$(arg world_frame)</frameName>
-			</plugin>
-		</gazebo> -->
 
-		<gazebo>
-			<plugin name="drag_$(arg drone_index)" filename="libLiftDragPlugin.so">
-				<a0>0.1</a0>
-				<cla>5.418</cla>
-				<cda>0.01</cda>
-				<cma>0.0</cma>
-				<alpha_stall>0.3368</alpha_stall>
-				<cla_stall>-0.2</cla_stall>
-				<cda_stall>1.0</cda_stall>
-				<cp>0 0 0</cp>
-				<area>2e-3</area>
-				<air_density>1.2041</air_density>
-				<forward>1 0 0</forward>
-				<upward>0 0 1</upward>
-				<link_name>base_link_$(arg drone_index)</link_name>
-			</plugin>
-		</gazebo>
-	  
-	  
-			<!-- Uptrust force plugin for propellers
-		<gazebo>
+			<!-- Uptrust force plugin for propellers -->
+	<gazebo>
 			<plugin name="FL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -152,6 +122,7 @@
 		</gazebo>
 		
 		<gazebo>
+			<!-- Provide a Negative Velocity -->
 			<plugin name="FR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -172,6 +143,7 @@
 		</gazebo>
 		
 		<gazebo>
+			<!-- Provide a Positive Velocity -->
 			<plugin name="BL_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -192,6 +164,7 @@
 		</gazebo>
 		
 		<gazebo>
+			<!-- Provide a Positive Velocity -->
 			<plugin name="BR_lift_$(arg drone_index)" filename="libLiftDragPlugin.so">
 				<a0>0.1</a0>
 				<cla>0.1</cla>
@@ -209,7 +182,7 @@
 				<link_name>BR_link_$(arg drone_index)</link_name>
 				<control_joint>BR_joint_$(arg drone_index)</control_joint>
 			</plugin>
-		</gazebo> -->
+		</gazebo>
 
 	<gazebo reference="BR_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
@@ -223,43 +196,14 @@
 	<gazebo reference="FL_joint_$(arg drone_index)">
 		<provideFeedback>true</provideFeedback>
     </gazebo>
-
 	<gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<robotNamespace>drone$(arg drone_index)</robotNamespace>
-		<linkName>base_link_$(arg drone_index)</linkName>
+		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+		<updateRate>10.0</updateRate>
+		<topicName>BR_joint_sensor</topicName>
+		<jointName>BR_joint_$(arg drone_index)</jointName>
 		</plugin>
   	</gazebo>
-
 	<gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<robotNamespace>drone$(arg drone_index)</robotNamespace>
-		<linkName>BR_link_$(arg drone_index)</linkName>
-		</plugin>
-  	</gazebo>
-
-	<gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<robotNamespace>drone$(arg drone_index)</robotNamespace>
-		<linkName>BL_link_$(arg drone_index)</linkName>
-		</plugin>
-  	</gazebo>
-	
-	<gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<robotNamespace>drone$(arg drone_index)</robotNamespace>
-		<linkName>FL_link_$(arg drone_index)</linkName>
-		</plugin>
-  	</gazebo>
-	
-	<gazebo>
-		<plugin name="gazebo_force_plugin" filename="libgazebo_force_plugin.so">
-		<robotNamespace>drone$(arg drone_index)</robotNamespace>
-		<linkName>FR_link_$(arg drone_index)</linkName>
-		</plugin>
-  	</gazebo>
-
-	<!-- <gazebo>
 		<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
 		<updateRate>10.0</updateRate>
 		<topicName>BL_joint_sensor</topicName>
@@ -279,8 +223,7 @@
 		<topicName>FL_joint_sensor</topicName>
 		<jointName>FL_joint_$(arg drone_index)</jointName>
 		</plugin>
-  	</gazebo> -->
-	
+  	</gazebo>
   <!-- ros_control plugin --> 
   <gazebo> 
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> 

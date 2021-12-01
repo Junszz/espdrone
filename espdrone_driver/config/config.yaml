@@ -4,19 +4,19 @@ drone1:
     publish_rate: 20
 
   # Velocity Controllers ---------------------------------------
-  joint1_velocity_controller:
+  jointFL_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: FL_joint_1
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint2_velocity_controller:
+  jointFR_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: FR_joint_1
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint3_velocity_controller:
+  jointBL_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: BL_joint_1
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint4_velocity_controller:
+  jointBR_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: BR_joint_1
     pid: {p: 1.0, i: 0.01, d: 0.0}
@@ -27,19 +27,19 @@ drone2:
     type: joint_state_controller/JointStateController
     publish_rate: 20
 
-  joint1_velocity_controller:
+  jointFL_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: FL_joint_2
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint2_velocity_controller:
+  jointFR_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: FR_joint_2
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint3_velocity_controller:
+  jointBL_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: BL_joint_2
     pid: {p: 1.0, i: 0.01, d: 0.0}
-  joint4_velocity_controller:
+  jointBR_velocity_controller:
     type: velocity_controllers/JointVelocityController
     joint: BR_joint_2
     pid: {p: 1.0, i: 0.01, d: 0.0}

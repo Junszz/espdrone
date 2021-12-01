@@ -1,0 +1,23 @@
+<class_libraries>
+  <library path="lib/libespdrone_pose_controller">
+    <class name="espdrone_controller/PoseController" type="espdrone_controller::PoseController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The PoseController controls the quadrotor's pose and outputs velocity commands.
+    </description>
+    </class>
+  </library>
+  <library path="lib/libespdrone_twist_controller">
+    <class name="espdrone_controller/TwistController" type="espdrone_controller::TwistController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The TwistController controls the quadrotor's twist (linear and angular velocity) by applying torque and thrust similar to a real quadrotor.
+    </description>
+    </class>
+  </library>
+  <library path="lib/libespdrone_motor_controller">
+    <class name="espdrone_controller/MotorController" type="espdrone_controller::MotorController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The MotorController calculates the output voltages of the four motors from the commanded thrust and torque using a simple linearized model.
+    </description>
+    </class>
+  </library>
+</class_libraries>

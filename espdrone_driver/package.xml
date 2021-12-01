@@ -17,8 +17,12 @@ for espdrone robot</p>
   <depend>joint_state_controller</depend>
   <depend>gazebo</depend>
   <depend>gazebo_msgs</depend>
+  <depend>gazebo_ros</depend>
+  <depend>roscpp</depend>
   
+  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <architecture_independent />
+    <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
   </export>
+
 </package>

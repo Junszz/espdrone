@@ -1,14 +1,19 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+
 import threading
+
 import rospy
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Wrench
 from std_msgs.msg import Empty
 
 import sys, select, termios, tty
+import argparse
 
+drone_mass = 0.5
 msg = """
 Reading from the keyboard  and Publishing to Twist!
+1: Take_off  2: Landing  3: flip drone
 ---------------------------
 Moving around:
    u    i    o
@@ -66,7 +71,6 @@ speedBindings={
 class PublishThread(threading.Thread):
     def __init__(self, rate):
         super(PublishThread, self).__init__()
-        self.publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
@@ -112,7 +116,7 @@ class PublishThread(threading.Thread):
         self.done = True
         self.update(0, 0, 0, 0, 0, 0)
         self.join()
-
+        
     def run(self):
         twist = Twist()
         while not self.done:
@@ -152,6 +156,7 @@ def getKey(key_timeout):
         key = ''
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
+ 
 
 
 def vels(speed, turn):
@@ -159,12 +164,17 @@ def vels(speed, turn):
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
+
     rospy.init_node('teleop_twist_keyboard')
-    pub2 = rospy.Publisher('drone/takeoff', Empty, queue_size = 1)
-    pub3 = rospy.Publisher('drone/land', Empty, queue_size = 1)
+    # drone_index = str(1) # hard coding lol
+    drone_index = rospy.get_param("~drone_index")
+    drone_index = str(drone_index)
+    pub = rospy.Publisher('/drone' + drone_index + '/cmd_vel', Twist, queue_size = 1)
+    pub2 = rospy.Publisher('/drone' + drone_index + '/take_off', Empty, queue_size = 1)
+    pub3 = rospy.Publisher('/drone' + drone_index + '/land', Empty, queue_size = 1)
+    pub4 = rospy.Publisher('/drone' + drone_index + '/FL_link_' + drone_index +"/wrench", Wrench, queue_size = 1)
     empty_msg = Empty()
-    speed = rospy.get_param("~speed", 0.5)
+    speed = rospy.get_param("~speed", 0.05)
     turn = rospy.get_param("~turn", 1.0)
     repeat = rospy.get_param("~repeat_rate", 0.0)
     key_timeout = rospy.get_param("~key_timeout", 0.0)
@@ -192,6 +202,7 @@ if __name__=="__main__":
                 y = moveBindings[key][1]
                 z = moveBindings[key][2]
                 th = moveBindings[key][3]
+                print(f"x:{x}, y:{y}, z:{z}, th:{th}")
             elif key in speedBindings.keys():
                 speed = speed * speedBindings[key][0]
                 turn = turn * speedBindings[key][1]
@@ -205,12 +216,23 @@ if __name__=="__main__":
                 pub2.publish(empty_msg)
             elif key == '2':
                 pub3.publish(empty_msg)
+            elif key == '3':
+                value = drone_mass*300
+                tmp_wrench = Wrench()
+                tmp_wrench.force.z = -1*value
+                #publish impulse value to flip the drone
+                print("flip")
+                pub4.publish(tmp_wrench)
+                tmp_wrench.force.z = 0
+                print("stop")
+                pub4.publish(tmp_wrench)
             
             else:
                 # Skip updating cmd_vel if key timeout and robot already
                 # stopped.
                 if key == '' and x == 0 and y == 0 and z == 0 and th == 0:
                     continue
+                print("stop")
                 x = 0
                 y = 0
                 z = 0
@@ -219,11 +241,10 @@ if __name__=="__main__":
                     break
                 
             twist = Twist()
-        twist.linear.x = x*speed; twist.linear.y = y*speed; twist.linear.z = z*speed; 
-        twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
-        pub.publish(twist)
-        
-        pub_thread.update(x, y, z, th, speed, turn)
+            twist.linear.x = x*speed; twist.linear.y = y*speed; twist.linear.z = z*speed; 
+            twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
+            pub.publish(twist)
+            pub_thread.update(x, y, z, th, speed, turn)
 
     except Exception as e:
         print(e)
