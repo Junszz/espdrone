@@ -12,7 +12,7 @@ All the mass, moment of inertia etc are calibrated and is identical to the real 
 
 Any progress/add-ons will be updated in this reposity.
 
-Requires 'simulator-aruco-ros' from yuxi repo.
+Requires 'simulator-aruco-ros' from this repo: https://github.com/yuuxii0110/simulator-aruco-ros.git
 
 # Installation #
 
